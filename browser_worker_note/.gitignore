@@ -1,0 +1,25 @@
+# ナレッジログ（試験運用中は Git 管理して蓄積を残す）
+# knowledge/logs/
+
+# 生成画像の一時ファイル
+*.tmp
+temp/
+
+# 環境変数ファイル（認証情報を含む）
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Playwright MCP logs
+.playwright-mcp/

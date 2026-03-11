@@ -1,0 +1,26 @@
+# サイト定義
+# エージェントがログインを自動実行します（認証情報はブラウザセッションまたは環境変数から取得）
+
+sites:
+  # === サイト定義テンプレート ===
+  # サイトを追加する場合、以下の形式で記述してください
+  #
+  # site-name:
+  #   name: "表示名"
+  #   url: "https://example.com"
+  #   login_url: "https://example.com/login"
+  #   notes: "ログインに関する補足情報"
+
+  note:
+    name: "note"
+    url: "https://note.com/sitesettings/stats"
+    login_url: "https://note.com/login"
+    public_url: "https://note.com/akatu_unison"
+    notes: "メールアドレス+パスワード認証、またはSNSログイン（X/Google/Apple等）"
+
+  x:
+    name: "X（旧Twitter）"
+    url: "https://x.com/home"
+    login_url: "https://x.com/i/flow/login"
+    public_url: "https://x.com/UaW6wnKW8c87193"
+    notes: "メールアドレス/電話番号+パスワード認証。2FA有効の場合あり"

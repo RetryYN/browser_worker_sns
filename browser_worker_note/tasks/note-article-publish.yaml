@@ -1,0 +1,75 @@
+# note 記事公開タスク
+# /run-task note-article-publish テーマ: AIエージェントの現在地
+
+name: note-article-publish
+description: noteに新しい記事を作成して公開する
+
+site: note
+
+params:
+  - name: theme
+    description: 記事のテーマ・主題
+    required: true
+    example: "AIエージェントの現在地"
+  - name: tags
+    description: 記事に付けるタグ（カンマ区切り）
+    required: false
+    example: "AI, エージェント, テクノロジー"
+
+steps:
+  # ダッシュボードにアクセス
+  - action: navigate
+    description: "noteのダッシュボードにアクセスする"
+    url: "https://note.com/sitesettings/stats"
+
+  # ログイン確認
+  - action: login
+    description: "ログイン状態を確認し、未ログインなら自動ログインする"
+    site: "{{site}}"
+
+  # 記事作成画面に遷移
+  - action: interact
+    description: |
+      新規記事作成ボタンをクリックしてエディタ画面に遷移する
+
+  # 記事本文を生成
+  - action: generate_text
+    description: "{{theme}} をテーマに記事本文を生成する"
+    instruction: |
+      テーマ「{{theme}}」について、note向けの記事を生成する。
+      - 読者の関心を引く導入
+      - 具体例や体験を交えた本文
+      - 次のアクションにつながる結び
+    skill: copywriting
+
+  # 組織的監査（多角レビュー）
+  - action: committee_review
+    description: "生成した記事を組織的視点で段階的に監査する"
+    target_text: "{{prev_result}}"
+    skill: copywriting
+    review_pipeline:
+      upstream:
+        - role: Editor
+        - role: Marketer
+      downstream:
+        - role: Editor
+        - role: Writer
+      executor: CEO
+
+  # エディタに入力
+  - action: interact
+    description: |
+      以下の操作を行う:
+      1. タイトル欄に記事タイトルを入力する
+      2. 本文エリアに記事本文を入力する
+      3. タグ欄に {{tags}} を入力する
+
+  # サムネイル画像アップロード（任意）
+  - action: upload_image
+    description: "サムネイル画像をアップロードする（画像がある場合）"
+
+  # 公開前確認
+  - action: verify
+    description: "プレビューで記事の見た目を確認してスクリーンショットを撮る"
+
+on_error: "スクリーンショットを撮って状況を報告する"

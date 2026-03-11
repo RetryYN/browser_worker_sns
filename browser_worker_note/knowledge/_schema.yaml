@@ -1,0 +1,40 @@
+# ナレッジ記録フォーマット定義
+
+# サイト別ナレッジ（knowledge/sites/<site-name>/）のフォーマット
+site_knowledge:
+  format: markdown
+  sections:
+    - name: "概要"
+      description: "サイトの基本情報"
+    - name: "ログイン"
+      description: "ログイン手順、注意点"
+    - name: "ページ構造"
+      description: "主要ページのUI構造、メニュー配置"
+    - name: "エディタ"
+      description: "記事・投稿エディタのフォーム構造、入力フィールド"
+    - name: "注意点"
+      description: "セッション制限、バリデーション、既知の問題"
+
+# タスク実行ログ（knowledge/logs/<task-name>_<date>.md）のフォーマット
+# run-task.md I-3 のログテンプレートと整合
+task_log:
+  format: markdown
+  sections:
+    - name: "実行結果"
+      description: "成功 / 失敗"
+    - name: "フェーズ"
+      description: "①初回 / ②再訪問 / ③構造変更 / ④最適化"
+    - name: "パラメータ"
+      description: "使用したパラメータの一覧"
+    - name: "Before State"
+      description: "変更前の値"
+    - name: "After State"
+      description: "変更後の値"
+    - name: "実行ステップ（実測）"
+      description: "実際に実行したブラウザ操作のステップ一覧"
+    - name: "短縮メモ"
+      description: "次回の効率化候補（省略可能なステップ等）"
+    - name: "学び"
+      description: "発見した注意点、効率化のコツ"
+    - name: "エラー"
+      description: "発生したエラーと対処法（該当時のみ）"

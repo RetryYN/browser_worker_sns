@@ -1,0 +1,64 @@
+# タスク定義テンプレート
+# /create-task で新しいタスクを作成する際のひな形
+
+name: your-task-name
+description: タスクの概要をここに書く
+
+# config/sites.yaml で定義したサイトのキー名
+site: note
+
+# パラメータ: 実行時にユーザーが指定する変動値
+params:
+  - name: param_name
+    description: パラメータの説明
+    required: true
+    example: "例の値"
+
+# ステップ: 上から順番に実行される
+steps:
+  # URL遷移
+  - action: navigate
+    description: "対象ページにアクセスする"
+    url: "https://note.com/dashboard"
+
+  # ログイン
+  - action: login
+    description: "ログインする"
+    site: "{{site}}"
+
+  # ブラウザ操作
+  - action: interact
+    description: |
+      以下の操作を行う:
+      1. 操作手順を自然言語で記述
+      2. {{param_name}} のように変数を埋め込める
+
+  # AI文章生成
+  - action: generate_text
+    description: "文章を生成する"
+    instruction: "どんな文章を生成するかの指示"
+
+  # 組織的監査（多角レビュー）
+  # - action: committee_review
+  #   description: "生成した文章を組織的視点で段階的に監査する"
+  #   target_text: "{{prev_result}}"
+  #   skill: copywriting
+  #   review_pipeline:
+  #     upstream:
+  #       - role: Editor
+  #       - role: Marketer
+  #     downstream:
+  #       - role: Editor
+  #       - role: Writer
+  #     executor: CEO
+
+  # 画像アップロード
+  - action: upload_image
+    description: "サムネイル画像をアップロードする"
+
+  # 結果確認
+  - action: verify
+    description: "結果を確認してスクリーンショットを撮る"
+
+# エラー時の対応
+on_error: "スクリーンショットを撮って状況を報告する"
