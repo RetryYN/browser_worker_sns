@@ -96,6 +96,75 @@
 - [ ] マガジン（/magazines/all）
 - [ ] 画像ギャラリー（/creator_gallery）
 
+## トピック設計（ハッシュタグ & マガジン）
+
+記事にはトピックをタグとして付与する。noteのハッシュタグとマガジンに対応。
+
+### トピック一覧
+
+| トピック | ハッシュタグ | マガジン | 内容 |
+|---------|------------|---------|------|
+| ChatGPT | #ChatGPT | ChatGPT | ChatGPTの機能・使い方・アプデ |
+| Claude | #Claude | Claude | Claudeの機能・使い方・アプデ |
+| Gemini | #Gemini | Gemini | Geminiの機能・使い方・アプデ |
+| Grok | #Grok | Grok | Grokの機能・使い方・アプデ |
+| 画像生成 | #AI画像生成 | AI画像生成 | AI画像生成全般（DALL-E、Midjourney等） |
+| プロンプト | #プロンプト | プロンプト | プロンプトの書き方・改善テクニック |
+| AI比較 | #AI比較 | AI比較 | 複数AIの横並び検証 |
+| AI活用術 | #AI活用 | AI活用術 | 業務での使い方・コツ |
+| AIニュース | #AIニュース | AIニュース | 業界動向・アップデート速報 |
+| AI裏側 | #AI裏側 | AI裏側 | このアカウントの制作過程 |
+
+### サブトピック
+
+メイントピックと組み合わせて使う。ハッシュタグとして付与するが、マガジンは作らない。
+
+| サブトピック | ハッシュタグ | 用途 |
+|------------|------------|------|
+| Claude Code | #ClaudeCode | Claude Code の機能・活用 |
+| Cursor | #Cursor | Cursor の機能・活用 |
+| Codex | #Codex | OpenAI Codex CLI の機能・活用 |
+| Sora | #Sora | Sora（動画生成AI）の機能・活用 |
+| NotebookLM | #NotebookLM | Google NotebookLM の機能・活用 |
+| DALL-E | #DALLE | DALL-E の画像生成 |
+| Midjourney | #Midjourney | Midjourney の画像生成 |
+| AI Idol Orchestra | #AIIdolOrchestra | このアカウントのキャラ・世界観 |
+
+サブトピックは固定ではなく、新しいツール・サービスが出たら随時追加する。
+
+### 運用ルール
+
+- 1記事に**メイントピック1つ + サブトピック1-2個**を付与
+- メイントピック = マガジンの振り分け先
+- ハッシュタグはメイン + サブの両方を付ける
+- AI比較の記事には比較対象のAI名タグも付ける（例: #AI比較 #ChatGPT #Claude）
+- noteの共通ハッシュタグ（#AI #人工知能 等）も併用して検索流入を狙う
+
+### ネタタイプとの対応
+
+| ネタタイプ | 主なトピック |
+|-----------|------------|
+| update | 各AI名（ChatGPT/Claude/Gemini/Grok）、AIニュース |
+| compare | AI比較 + 比較対象のAI名 |
+| howto | プロンプト、AI活用術、画像生成 |
+| trend | AIニュース |
+| real | AI活用術、各AI名 |
+
+### マガジン作成状況
+
+- [ ] ChatGPT
+- [ ] Claude
+- [ ] Gemini
+- [ ] Grok
+- [ ] AI画像生成
+- [ ] プロンプト
+- [ ] AI比較
+- [ ] AI活用術
+- [ ] AIニュース
+- [ ] AI裏側
+
+→ マガジン作成は `/magazines/all` の探索後に実施
+
 ## 注意事項
 
 - **ダッシュボードURL変更**: `/dashboard` は404。正しくは `/sitesettings/stats`

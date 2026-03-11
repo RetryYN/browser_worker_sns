@@ -200,6 +200,31 @@ Upstream で NoGo の場合、Downstream をスキップしてコストを節約
 2. 重複するファイルがないか `Glob` / `Grep` で検索する
 3. 重複があれば既存ファイルを編集する（新規作成しない）
 
+## ナレッジ参照ガイド
+
+記事の設計・執筆時は以下を参照する:
+
+| ファイル | 内容 |
+|---------|------|
+| `knowledge/account-concept.md` | ペルソナ（ミサキ層）・ポジショニング・ソース戦略・トーン |
+| `knowledge/content-types.md` | 内容(C1-C8) × 構成パターン(P1-P10) + 演出ガイド + 参考情報ルール |
+| `knowledge/external-sources.md` | 巡回先ソース一覧（RSS/API有無・ネタタイプ対応） |
+| `knowledge/characters/team-orchestra.md` | キャラ設定・掛け合いルール |
+| `knowledge/sites/note/image-regulation.md` | 画像レギュレーション（正本） |
+| `knowledge/sites/note/thumbnail-guide.md` | noteサムネイル表示仕様・デザイン知見 |
+| `.claude/workflows/research.md` | リサーチフロー（ソース収集→ネタタイプ判定→実演→検証） |
+
+### コンテンツ設計の原則
+
+- 記事 = **内容 × 構成パターン**（演出は独立レイヤー）
+- 演出（サムネスタイル・キャラ構成・掛け合いの有無）はタイプではない
+- **リードに全結論を入れる**（結論を隠して引っ張る構成は使わない）
+
+## Git
+
+- リモート: `https://github.com/RetryYN/browser_worker_sns.git`
+- ブランチ: `main`
+
 ## 守るべきルール
 
 - `config/policies.yaml` の禁止事項を厳守する
