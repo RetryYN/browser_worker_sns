@@ -1,0 +1,57 @@
+# X レポート集約タスク
+# /run-task x-report-rollup mode: weekly
+
+name: x-report-rollup
+description: Xの個別レポートを集約し、週間または月間レポートを生成する
+
+site: x
+
+params:
+  - name: mode
+    description: "集約モード。weekly または monthly"
+    required: true
+    example: "weekly"
+  - name: date
+    description: "weekly 実行時の対象日（YYYY-MM-DD）。省略時は当日"
+    required: false
+    example: "2026-03-13"
+  - name: month
+    description: "monthly 実行時の対象月（YYYY-MM）。省略時は当月"
+    required: false
+    example: "2026-03"
+
+steps:
+  - action: command
+    description: "mode に応じて x_report.py を実行し、週間または月間レポートを生成する"
+    command: |
+      $mode = "{{mode}}"
+      $date = "{{date}}"
+      $month = "{{month}}"
+
+      if ($mode -eq "weekly") {
+        if ($date) {
+          python scripts/x_report.py weekly --date $date
+        } else {
+          python scripts/x_report.py weekly
+        }
+      } elseif ($mode -eq "monthly") {
+        if ($month) {
+          python scripts/x_report.py monthly --month $month
+        } else {
+          python scripts/x_report.py monthly
+        }
+      } else {
+        Write-Error "mode must be weekly or monthly"
+        exit 1
+      }
+
+  - action: command
+    description: "生成済みレポートファイルを確認し、直近のファイル名を表示する"
+    command: |
+      if ("{{mode}}" -eq "weekly") {
+        Get-ChildItem "knowledge/logs/x/weekly" -Filter "*.yaml" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object { $_.FullName }
+      } else {
+        Get-ChildItem "knowledge/logs/x/monthly" -Filter "*.yaml" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object { $_.FullName }
+      }
+
+on_error: "実行ログを添えて状況を報告する"

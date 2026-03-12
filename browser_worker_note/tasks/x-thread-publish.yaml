@@ -1,0 +1,52 @@
+# X スレッド投稿タスク
+# /run-task x-thread-publish thread_text: 1投目\n---\n2投目
+
+name: x-thread-publish
+description: Xに複数ポストのスレッドを作成して投稿または予約投稿する
+
+site: x
+
+params:
+  - name: thread_text
+    description: "各ポストを `---` 区切りで連結した本文。2-6ポストを想定する"
+    required: true
+    example: "1投目の本文\n---\n2投目の本文\n---\n3投目の本文"
+  - name: image_paths
+    description: "各ポストに対応する画像パス。カンマ区切りで渡し、空要素はスキップする"
+    required: false
+    example: "knowledge/data/images/x_grid_panel-1_example_2026-03-12.jpg, knowledge/data/images/x_grid_panel-2_example_2026-03-12.jpg"
+  - name: schedule_at
+    description: "予約投稿する場合の日時（JST、YYYY-MM-DD HH:mm）"
+    required: false
+    example: "2026-03-18 20:00"
+
+steps:
+  - action: navigate
+    description: "Xのホームにアクセスする"
+    url: "https://x.com/home"
+
+  - action: login
+    description: "ログイン状態を確認し、未ログインならログインする"
+    site: "{{site}}"
+
+  - action: interact
+    description: |
+      投稿フォームを開き、{{thread_text}} を `---` 区切りで 2-6 件のポストに分割して順番に入力する。
+      「ポストを追加」UIを使って1つのスレッドとして並べる。
+      {{image_paths}} が指定されている場合はカンマ区切りで分割し、対応する順番のポストにのみ画像を添付する。
+      画像が足りないポストはテキストのみで進める。投稿レイヤーで画像加工は行わない。
+      {{schedule_at}} が指定されている場合は予約投稿UIも開ける状態まで進める。
+
+  - action: verify
+    description: "各ポスト本文、添付画像、スレッド順序、確定ボタンの状態を確認してスクリーンショットを撮る"
+
+  - action: interact
+    description: |
+      {{schedule_at}} が未指定なら今すぐスレッドを投稿する。
+      {{schedule_at}} が指定されている場合は予約投稿UIで日時を設定し、スレッド全体を予約投稿として確定する。
+      実行前にユーザー最終承認を取り、承認後にのみ確定ボタンを押す。
+
+  - action: verify
+    description: "投稿完了トースト、公開済みスレッド、または予約完了状態を確認してスクリーンショットを撮る"
+
+on_error: "スクリーンショットを撮って状況を報告する"

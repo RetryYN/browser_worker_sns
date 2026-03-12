@@ -1,220 +1,280 @@
-# リサーチフロー
+---
+description: ネタ調査から記事化・投稿候補の引き渡しまでを行うリサーチワークフロー
+---
 
-ネタの収集 → 分類 → 実演判定 → 実演 → 検証 → 記事設計への引き渡し。
+# /research ワークフロー
 
-## 概要
+ネタの収集、分類、実演可否判断、検証、キュー登録、`/run-task` への引き渡しまでを担当する。
+
+## 使い方
 
 ```
-[自動] cron: RSS/API巡回 → ネタ候補リスト蓄積
-                                  ↓
-[手動] /research 起動
-        ├─ 1. ネタ候補リスト確認
-        ├─ 2. RSS非対応サイトをPlaywright巡回
-        ├─ 3. ネタタイプ判定
-        ├─ 4. 実演判定
-        │    ├─ OK → 実演フロー
-        │    └─ NG → テキストのみで記事設計へ
-        ├─ 5. 検証フロー
-        └─ 6. 出力 → /run-task へ
+/research [任意のフォーカス]
 ```
+
+例:
+- `/research Claude Code`
+- `/research AI画像生成のネタを3本`
+- `/research X向けの参加型ネタを探す`
 
 ---
 
-## 1. ソース収集（自動 + 手動）
+## このワークフローの責務
 
-### 自動巡回（cron）
+- 外部ソースからネタ候補を集める
+- `update / compare / howto / trend / real` に分類する
+- 実演できるか判定する
+- 必要な事実確認をする
+- リサーチログを更新する
+- X向けなら `knowledge/x-content-queue.md` を更新する
+- note/X に流すための handoff を作る
 
-RSS/API がある公式ソースを定期取得し、ネタ候補リストに蓄積する。
-取得だけ。判断はしない。
+**やらないこと**
+- その場で投稿・公開まではしない
+- 課金・削除・設定変更はしない
+- 実演のためだけに危険操作をしない
 
+---
+
+## 起動時に必ず読むファイル
+
+1. `knowledge/external-sources.md`
+2. `knowledge/content-types.md`
+3. `knowledge/sites/note/index.md` のトピック設計
+4. `knowledge/sites/x/posting-strategy.md`
+5. `config/policies.yaml`
+6. 当日ログ `knowledge/logs/research/YYYY-MM-DD.md`（なければ `_template.md` を複製して作成）
+7. `knowledge/x-content-queue.md`
+
+---
+
+## 実行手順
+
+### 1. スコープ確認
+
+ユーザーの指示から以下を決める。
+
+- 対象媒体: `note / x / both`
+- 優先トピック: 例 `Claude`, `ChatGPT`, `AI比較`
+- 本数目安: 指定がなければ **3候補**
+- 緊急度: `速報系` か `ストック系` か
+
+指定が曖昧なら、以下をデフォルトにする。
+
+```yaml
+target: both
+count: 3
+priority: balanced
 ```
-巡回先: knowledge/external-sources.md の auto_fetch: true のソース
-出力先: knowledge/logs/research/YYYY-MM-DD.md
+
+### 2. 当日ログ準備
+
+1. `knowledge/logs/research/_template.md` を読む
+2. 当日ログ `knowledge/logs/research/YYYY-MM-DD.md` がなければ作成する
+3. すでに同日ログがあれば追記モードで使う
+
+### 3. 候補収集
+
+#### 3-1. X Search によるトレンド収集（推奨）
+
+フォーカスが指定されている場合、まず X Search で X 上のリアルタイムな話題を収集する。
+
+```bash
+# トレンド検索
+python scripts/x_search.py trend "<フォーカスキーワード>" --period 7d
+
+# 特定トピックの事前調査
+python scripts/x_search.py topic "<候補テーマ>" --period 30d
 ```
 
-取得する情報:
+- 結果は `knowledge/logs/x/research/trend/` に YAML 保存される
+- ネタ候補は `knowledge/logs/x/research/ideas.yaml` に自動蓄積される
+- 蓄積済みの ideas.yaml も確認し、未使用のネタがあればそこから拾う
+
+#### 3-2. auto_fetch ソース
+
+`knowledge/external-sources.md` の `auto_fetch: yes` を優先して確認する。
+
+収集項目:
 - タイトル
 - URL
 - 公開日
-- ソースカテゴリ（provider / trend / tech-blog）
+- ソースカテゴリ
 
-### 手動巡回（/research 起動時）
+#### 3-3. auto_fetch: no ソース
 
-RSS非対応サイトは Playwright MCP で巡回し、新着を確認する。
+RSS 非対応サイトはブラウザで巡回する。
 
-```
-1. mcp__playwright__browser_navigate で対象サイトにアクセス
-2. mcp__playwright__browser_snapshot で見出し一覧を取得
-3. 前回巡回時（knowledge/logs/research/ の最新ログ）と差分を確認
-4. 新着をネタ候補リストに追記
-```
+手順:
+1. `browser_navigate`
+2. `browser_snapshot`
+3. 見出し一覧を取得
+4. 最新ログとの差分を見る
+5. 新着だけを候補に追加
 
----
+### 4. 一次ふるい
 
-## 2. ネタタイプ判定
+各候補を以下で落とす。
 
-収集したネタを以下の5タイプに分類する。
+- 明らかな二次転載のみ
+- 既に同趣旨で直近対応済み
+- 実読価値が薄い細かな UI 文言変更
+- 安全に検証できない課金・削除・設定変更系
 
-| タイプ | 内容 | content-types.md との対応 | 実演相性 |
-|--------|------|--------------------------|---------|
-| **update** アップデート速報 | 公式の新機能・変更点 | C3 ニュース × P4 逆三角形 or P8 対話劇 | 高 |
-| **compare** 比較検証 | 複数AIやツールの横並び検証 | C6 比較 × P3 並列比較 or P8 対話劇 | 高 |
-| **howto** ノウハウ翻訳 | 技術ブログの実践知をノンエンジニア向けに | C2 ノウハウ × P2 ステップ or P6 Before/After | 中 |
-| **trend** トレンド解説 | 業界動向・データの読み解き | C8 トレンド分析 × P4 逆三角形 or P1 PREP | 低 |
-| **real** あるある・ネタ | 実体験ベースのAIあるある | C4 体験 × P8 対話劇 or P6 Before/After | 中 |
+### 5. ネタタイプ判定
 
-### 判定基準
+| タイプ | 判定基準 | 推奨 content-type |
+|---|---|---|
+| `update` | 新機能、仕様変更、リリース | `C3 × P4` または `C3 × P8` |
+| `compare` | 複数AI・複数ツールの比較 | `C6 × P3` または `C6 × P8` |
+| `howto` | 手順、ノウハウ、再現方法 | `C2 × P2` または `C2 × P6` |
+| `trend` | 市場動向、数値、業界解説 | `C8 × P4` または `C8 × P1` |
+| `real` | 実体験、あるある、運用知見 | `C4 × P6` または `C4 × P8` |
 
-```
-一次ソースに新機能・バージョン情報がある → update
-複数のツール/AIが比較対象になる         → compare
-手順・やり方・Tipsが核                 → howto
-数値・市場動向・将来予測が核            → trend
-「使ってみたらこうだった」が核          → real
-```
+### 6. 実演判定
 
----
+以下5項目を `OK / NG` で判定する。
 
-## 3. 実演判定
+1. ブラウザで到達可能か
+2. 操作が再現可能か
+3. スクショに意味があるか
+4. 安全に実行可能か
+5. ログイン済みセッションで到達可能か
 
-Claude Code（Playwright MCP）で実画面を見せられるかを判定する。
+判定ルール:
+- `OK 5/5`: 実演あり
+- `OK 3-4/5`: 部分実演
+- `OK 0-2/5`: テキストのみ
 
-### 判定チェックリスト
+### 7. 検証
 
-| # | チェック項目 | OK | NG |
-|---|------------|----|----|
-| 1 | ブラウザでアクセス可能か | 公開ページ、無料ツール | 有料限定、モバイルアプリ専用 |
-| 2 | 操作が再現可能か | プロンプト入力→出力確認 | アプリインストール必須 |
-| 3 | スクショが意味をなすか | UI変更、出力結果、比較画面 | 内部アルゴリズム変更（見た目に出ない） |
-| 4 | 安全に実行可能か | 読み取り・生成系 | 課金・削除・外部送信を伴う操作 |
-| 5 | ログインウォールの中か | ログイン済みセッションで到達可能 | 新規登録・決済が必要 |
+検証対象:
+- 機能
+- 料金
+- 数値
+- 日付
+- 比較軸
 
-### 判定結果
+手順:
+1. 記事化・投稿化に使う事実を抽出
+2. 一次ソースを特定
+3. 必要ならブラウザまたは WebSearch/WebFetch 相当で再確認
+4. 未確認事項は留保表現前提で記録
 
-```
-全項目 OK        → 実演あり（スクショつき記事）
-1-2項目 NG       → 部分実演（アクセス可能な部分だけスクショ + 残りはテキスト）
-3項目以上 NG     → テキストのみ
-```
+### 8. 媒体ごとの落とし先を決める
 
----
+#### note 向き
 
-## 4. 実演フロー
+- 情報量が多い
+- 実演や比較の説明が必要
+- `content-types.md` の骨格に落とし込みやすい
 
-実演判定OKのネタに対して、実際にブラウザで操作してスクショを撮る。
+#### X 向き
 
-### 手順
+- 初速が命
+- 画像付きで一撃で伝わる
+- `posting-strategy.md` の型に当てやすい
 
-```
-1. 事前準備
-   - 操作対象のサイトナレッジを確認（knowledge/sites/）
-   - 操作手順をプランニング
+#### both 向き
 
-2. 操作 & 撮影
-   - mcp__playwright__browser_navigate で対象にアクセス
-   - 操作前のスクショを撮る（Before）
-   - 実際の操作を実行（プロンプト入力、機能操作等）
-   - 操作後のスクショを撮る（After）
-   - 注目ポイントがあれば追加スクショ
+- note: 詳細版
+- X: 予告版、クイズ版、図解版、4枚版
 
-3. 記録
-   - スクショを knowledge/data/images/research/ に保存
-   - 操作手順・結果をログに記録
-   - 成功/失敗、予想との差異をメモ
-```
+### 9. ログ更新
 
-### 撮影パターン
+当日ログに各候補を追記する。
 
-| パターン | 撮影内容 | 使い方 |
-|---------|---------|--------|
-| 新機能紹介 | 機能画面 → 操作 → 結果 | update 記事のエビデンス |
-| 比較撮影 | AI-A の出力 → AI-B の出力 → 並べて比較 | compare 記事の素材 |
-| 手順撮影 | ステップ1画面 → ステップ2画面 → … | howto 記事の図解 |
-| Before/After | 改善前 → 操作 → 改善後 | real / howto 記事の変化 |
+必須項目:
+- タイトル
+- ソースURL
+- ソースカテゴリ
+- ネタタイプ
+- トピック
+- 実演判定
+- 検証状態
+- 推奨 `C × P`
+- ミサキ刺さり度
+- 一言要約
 
----
+### 10. X キュー更新
 
-## 5. 検証フロー
+X向き、または both 向きの候補は `knowledge/x-content-queue.md` に追記・更新する。
 
-記事に含まれる事実情報のファクトチェック。account-concept.md のファクトチェックポリシーに準拠。
+管理状態:
+- `inbox`
+- `ready`
+- `scheduled`
+- `posted`
+- `dropped`
 
-### 手順
+### 11. handoff 生成
 
-```
-1. 事実抽出
-   - 記事内の事実情報（機能、料金、数値、日付）を抽出
+候補ごとに以下を出力する。
 
-2. 一次ソース突合
-   - 各事実に対して一次ソースを特定
-   - WebSearch / WebFetch で最新情報を確認
-   - ソースURL と確認日を記録
-
-3. 判定
-   - 確認できた → そのまま（ソース明示）
-   - 確認できない → 留保表現に変更 or 削除
-   - 古い情報 → 「執筆時点（YYYY年M月）」を明記
-
-4. 掛け合いチェック
-   - キャラの掛け合い内の「嘘」（特にGemini）にツッコミが入っているか確認
-
-5. 記録
-   - 検証結果をログに記録（knowledge/logs/research/）
-```
-
-### 検証レベル
-
-| ネタタイプ | 検証レベル | 理由 |
-|-----------|-----------|------|
-| update | 高 — 公式ソースと全項目突合 | 誤情報が信頼を致命的に損なう |
-| compare | 高 — 全比較軸で再検証 | 公平性が命 |
-| howto | 中 — 手順の再現性を確認 | 動かない手順は価値ゼロ |
-| trend | 中 — 数値・出典の確認 | 出典不明の数値は使わない |
-| real | 低 — 体験ベースなので事実確認は軽め | 感想は検証不要。引用した事実のみ確認 |
-
----
-
-## 6. 出力
-
-リサーチ結果を記事設計に引き渡す。
-
-### ネタ候補リストのフォーマット（knowledge/logs/research/YYYY-MM-DD.md）
-
-```markdown
-# リサーチログ YYYY-MM-DD
-
-## 新着ネタ
-
-### [ネタタイトル]
-- **ソース**: [URL]
-- **ソースカテゴリ**: provider / trend / tech-blog
-- **ネタタイプ**: update / compare / howto / trend / real
-- **トピック**: メイン: [トピック名] / サブ: [トピック名, ...]
-- **実演判定**: OK / 部分OK / NG
-- **実演メモ**: （実演OKの場合、何をどう撮るか）
-- **検証状態**: 未検証 / 検証済み
-- **content-types**: C? × P?（推奨の組み合わせ）
-- **ミサキ刺さり度**: 高 / 中 / 低
-- **一言**: （このネタの核心を1文で）
-```
-
-トピック一覧は `knowledge/sites/note/index.md` §トピック設計 を参照。
-
-### /run-task への引き渡し
-
-実演・検証が完了したネタは以下の情報を持って記事作成に進む:
+#### note handoff
 
 ```yaml
 theme: "ネタタイトル"
 source_url: "一次ソースURL"
-neta_type: "update"
 content_type: "C3 × P4"
 topic_main: "Claude"
-topic_sub: ["AIニュース", "Claude Code"]
-hashtags: ["#Claude", "#AIニュース", "#ClaudeCode"]
-demo_available: true
-demo_screenshots:
-  - "knowledge/data/images/research/screenshot-1.png"
-  - "knowledge/data/images/research/screenshot-2.png"
-verification_status: "verified"
+topic_sub: "AIニュース, Claude Code"
+research_brief: "この記事で押さえるべき論点"
+verification_log: "knowledge/logs/research/YYYY-MM-DD.md"
+tags: "Claude, AIニュース, Claude Code"
+```
+
+#### X handoff
+
+```yaml
+theme: "ネタタイトル"
+pattern: "quiz-senshuken / xgrid-4koma / tsukaiwake-chart / trend-sokuhou"
+image_type: "quiz-choice / diagram / thumbnail / none"
+source_url: "一次ソースURL"
+fact_notes: "X本文で盛りすぎないための事実メモ"
 verification_log: "knowledge/logs/research/YYYY-MM-DD.md"
 ```
+
+#### 推奨コマンド
+
+```text
+# note 記事
+/run-task note-article-publish theme: ... source_url: ... content_type: ... topic_main: ... topic_sub: ... research_brief: ... verification_log: ...
+
+# X 投稿（軽量版 — 推奨）
+/x-post <テーマ> schedule: YYYY-MM-DD HH:mm image: <image_type>
+
+# X 投稿（/run-task 正式フロー）
+/run-task x-idea-post-publish theme: ... pattern: ... image_type: ... source_url: ... fact_notes: ... schedule_at: ...
+```
+
+---
+
+## 出力フォーマット
+
+最終出力は以下の3部構成にする。
+
+### 1. 今日の候補
+
+3件前後。優先度順。
+
+### 2. 推奨アクション
+
+- note に回す候補
+- X に回す候補
+- 見送る候補
+
+### 3. handoff
+
+そのまま `/run-task` に渡せる形で提示する。
+
+---
+
+## 運用ルール
+
+- 同じ日付のログは新規作成せず追記する
+- research ログの本文は事実と判断を分けて書く
+- 検証未完了のネタを「確定ネタ」として queue に入れない
+- X向け queue に入れる時は `posting-strategy.md` の10型を必ず1つ紐付ける
+- 実演スクショがある場合は保存先も handoff に残す
+- note 記事化時は `note-article-publish` に research 情報を引き継ぐ

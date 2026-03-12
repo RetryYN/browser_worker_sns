@@ -1,0 +1,139 @@
+# X ネタ起点の一括投稿タスク
+# ⚠ 通常は `/x-post` ワークフローを使う。このタスクは `/run-task` 経由の正式フロー用。
+# `/x-post` は同等の機能を A-K ステップなしで軽量実行する。
+#
+# /run-task x-idea-post-publish theme: Claude Codeで議事録整理が速くなった image_type: diagram
+
+name: x-idea-post-publish
+description: ネタからX投稿本文を生成し、必要なら画像も生成して、そのまま投稿または予約投稿する（軽量版は /x-post を使用）
+
+site: x
+
+params:
+  - name: theme
+    description: 投稿の核になるネタ・主題
+    required: true
+    example: "Claude Codeで議事録整理が速くなった"
+  - name: pattern
+    description: "posting-strategy.md の投稿パターンID。未指定なら汎用短文として扱う"
+    required: false
+    example: "tsukaiwake-chart"
+  - name: source_url
+    description: 一次ソースURLや参照元URL
+    required: false
+    example: "https://openai.com/blog/example"
+  - name: fact_notes
+    description: 事実メモ、比較軸、留保したい点
+    required: false
+    example: "新機能の範囲は限定的。断定は避ける"
+  - name: image_type
+    description: "生成する画像タイプ。不要なら none または空。単発投稿向けに thumbnail / diagram / quiz-* を想定"
+    required: false
+    example: "diagram"
+  - name: image_prompt
+    description: 画像生成時の補足指示。空なら theme と pattern から汎用プロンプトを組み立てる
+    required: false
+    example: "AIの使い分けを一目で比較できる図解"
+  - name: style
+    description: thumbnail を使う場合のスタイル指定
+    required: false
+    example: "retro-os"
+  - name: chars
+    description: 画像に出すキャラ。カンマ区切り
+    required: false
+    example: "aiko,claude"
+  - name: layout
+    description: diagram などで使うレイアウト指定
+    required: false
+    example: "board"
+  - name: quiz_data
+    description: quiz-* で使う追加データ
+    required: false
+    example: "Q:どのAIが向いてる?|A:議事録|B:翻訳|C:壁打ち|D:全部"
+  - name: schedule_at
+    description: 予約投稿する場合の日時（JST、YYYY-MM-DD HH:mm）
+    required: false
+    example: "2026-03-18 12:00"
+
+steps:
+  - action: generate_text
+    description: "{{theme}} をもとに X 向け単発ポスト本文を生成する"
+    instruction: |
+      以下の情報をもとに、X の単発ポスト本文を 1 本だけ作成する。
+
+      - テーマ: {{theme}}
+      - 投稿パターン: {{pattern}}
+      - 一次ソース: {{source_url}}
+      - 事実メモ: {{fact_notes}}
+
+      要件:
+      - 140字以内
+      - 1つの主張に絞る
+      - ハッシュタグは最大1個まで
+      - URLは本文に入れない
+      - 投稿パターンが参加型なら、最後を軽い質問か反応誘導で締める
+      - 事実が曖昧な箇所は断定しない
+      - 画像が付く前提なので、本文で説明しすぎない
+
+      出力は必ず次の形式にする。
+      POST:
+      <最終本文>
+    skill: god-writing
+
+  - action: committee_review
+    description: "生成したX投稿本文を短文運用の観点で監査する"
+    target_text: "{{prev_result}}"
+    skill: god-writing
+    review_pipeline:
+      upstream:
+        - role: Editor
+        - role: Marketer
+      downstream:
+        - role: Editor
+        - role: Writer
+      executor: CEO
+
+  - action: generate_image
+    when: "{{image_type}}"
+    description: "{{theme}} に合わせたX投稿用画像を必要な場合のみ生成する"
+    type: "{{image_type}}"
+    prompt: "{{theme}} をX投稿向けに視覚化する。パターン: {{pattern}}。補足: {{image_prompt}}"
+    topic: "{{theme}}"
+    style: "{{style}}"
+    chars: "{{chars}}"
+    layout: "{{layout}}"
+    quiz_data: "{{quiz_data}}"
+    skill: image-generation
+
+  - action: navigate
+    description: "Xのホームにアクセスする"
+    url: "https://x.com/home"
+
+  - action: login
+    description: "ログイン状態を確認し、未ログインならログインする"
+    site: "{{site}}"
+
+  - action: interact
+    description: |
+      投稿フォームまたは投稿モーダルを開く。
+      `{{step_results[1]}}` の中から POST: の本文だけを読み取り、投稿本文欄に入力する。
+      {{schedule_at}} が指定されている場合は予約投稿UIも開ける状態まで進める。
+
+  - action: upload_image
+    when: "{{image_type}}"
+    description: "生成済み画像がある場合のみ、そのファイルをそのまま添付する"
+    file_path: "{{step_results[2]}}"
+
+  - action: verify
+    description: "投稿本文・添付画像・投稿ボタンの状態を確認してスクリーンショットを撮る"
+
+  - action: interact
+    description: |
+      {{schedule_at}} が未指定なら今すぐ投稿する。
+      {{schedule_at}} が指定されている場合は予約投稿UIで日時を設定し、予約投稿として確定する。
+      実行前にユーザー最終承認を取り、承認後にのみ確定ボタンを押す。
+
+  - action: verify
+    description: "投稿完了トースト、公開済みポスト、または予約完了状態を確認してスクリーンショットを撮る"
+
+on_error: "スクリーンショットを撮って状況を報告する"

@@ -93,8 +93,8 @@
 - [x] 公開設定画面（editor.note.com/notes/<id>/publish/）→ 詳細: [article-editor.md](article-editor.md#公開設定画面)
 - [x] クリエイターページ（/akatu_unison）→ 詳細: [public-page.md](public-page.md)
 - [x] 設定（/settings/account）→ 詳細: [settings.md](settings.md)
-- [ ] マガジン（/magazines/all）
-- [ ] 画像ギャラリー（/creator_gallery）
+- [ ] マガジン（/magazines/all） — **優先度: 高**。トピック設計済みだが未作成。記事が5本以上溜まったら探索→作成
+- [ ] 画像ギャラリー（/creator_gallery） — **優先度: 低**。運用上の必要性が出てから探索
 
 ## トピック設計（ハッシュタグ & マガジン）
 

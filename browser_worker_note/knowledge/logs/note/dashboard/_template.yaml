@@ -1,0 +1,13 @@
+report_date: "YYYY-MM-DD"
+period: ""
+
+metrics:
+  page_views: unknown
+  visitors: unknown
+  likes: unknown
+  comments: unknown
+  followers: unknown
+
+top_articles: []
+
+notes: ""

@@ -202,22 +202,45 @@ Upstream で NoGo の場合、Downstream をスキップしてコストを節約
 
 ## ナレッジ参照ガイド
 
-記事の設計・執筆時は以下を参照する:
+### god-writing — サブエージェント分業
 
-| ファイル | 内容 |
-|---------|------|
-| `knowledge/account-concept.md` | ペルソナ（ミサキ層）・ポジショニング・ソース戦略・トーン |
-| `knowledge/content-types.md` | 内容(C1-C8) × 構成パターン(P1-P10) + 演出ガイド + 参考情報ルール |
-| `knowledge/external-sources.md` | 巡回先ソース一覧（RSS/API有無・ネタタイプ対応） |
-| `knowledge/characters/team-orchestra.md` | キャラ設定・掛け合いルール |
-| `knowledge/sites/note/image-regulation.md` | 画像レギュレーション（正本） |
-| `knowledge/sites/note/thumbnail-guide.md` | noteサムネイル表示仕様・デザイン知見 |
-| `.claude/workflows/research.md` | リサーチフロー（ソース収集→ネタタイプ判定→実演→検証） |
+**メインが戦略設計（エンティティ → 価値定義 → アウトライン）、サブエージェントが実行（執筆・校正）。**
+
+| 常駐（メイン） | 役割 |
+|---------------|------|
+| `.agent/skills/god-writing/SKILL.md` | 5原則 + 3法則 + ディスパッチ表 |
+| `.agent/skills/god-writing/quality-standards.md` | 品質基準（Level 4以上必須） |
+| `knowledge/content-types.md` | C×P選択 + 演出ガイド |
+| `knowledge/account-concept.md` | ペルソナ・エンティティ生成 |
+
+#### サブエージェントディスパッチ
+
+| Agent | 読ませるファイル | 役割 |
+|-------|----------------|------|
+| **リサーチ** | account-concept, external-sources, research.md | ネタ収集・実演・ハンドオフ |
+| **見出し** | headline-writing, benefit-writing, account-concept | タイトル10案出し + H2見出し最終調整 |
+| **執筆** | Base 6スキル + content-types + account-concept + C×P×媒体別スキル | アウトラインに従い本文生成 |
+| **校正** | quality-standards, proofreading, emphasis-technique, account-concept | 品質判定 + 修正指示 |
+
+ワークフロー詳細・プロンプトテンプレート → `.claude/workflows/generate-content.md`
+C×P×媒体別のスキル選択 → `SKILL.md` の「C×P別スキル選択表」を参照。
+スキルのパス: `.agent/skills/god-writing/`
+
+### ナレッジ・設定
+
+| ファイル | 内容 | 主な利用Agent |
+|---------|------|-------------|
+| `knowledge/account-concept.md` | ペルソナ・ポジショニング・トーン | リサーチ / 執筆 / 校正 |
+| `knowledge/content-types.md` | C1-C8 × P1-P10 + 演出ガイド | 執筆 |
+| `knowledge/external-sources.md` | 巡回先ソース一覧 | リサーチ |
+| `knowledge/characters/team-orchestra.md` | キャラ設定・掛け合いルール | 執筆 |
+| `knowledge/sites/note/image-regulation.md` | 画像レギュレーション（正本） | 執筆 |
+| `knowledge/sites/note/thumbnail-guide.md` | noteサムネイル表示仕様 | 執筆 |
+| `.claude/workflows/research.md` | リサーチフロー | リサーチ |
 
 ### コンテンツ設計の原則
 
 - 記事 = **内容 × 構成パターン**（演出は独立レイヤー）
-- 演出（サムネスタイル・キャラ構成・掛け合いの有無）はタイプではない
 - **リードに全結論を入れる**（結論を隠して引っ張る構成は使わない）
 
 ## Git

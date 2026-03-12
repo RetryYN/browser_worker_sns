@@ -1,0 +1,33 @@
+month: 2026-03
+executions:
+- task: dashboard-generate
+  timestamp: '2026-03-12T15:23:30'
+  status: success
+  duration_sec: 0.0
+  error: ''
+  retries: 0
+  notes:
+  - X投稿3件, note記事0件
+- task: algorithm-monitor-check
+  timestamp: '2026-03-12T15:24:19'
+  status: success
+  duration_sec: 0.0
+  error: ''
+  retries: 0
+  notes:
+  - 'データ不足: 0週'
+- task: dashboard-generate
+  timestamp: '2026-03-12T15:24:25'
+  status: success
+  duration_sec: 0.0
+  error: ''
+  retries: 0
+  notes:
+  - X投稿3件, note記事0件
+summary:
+  total_executions: 3
+  success_count: 3
+  failure_count: 0
+  success_rate: 100.0
+  avg_duration_sec: 0.0
+  most_common_errors: []

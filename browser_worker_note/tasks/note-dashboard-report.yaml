@@ -1,0 +1,97 @@
+# note ダッシュボードレポート取得タスク
+# /run-task note-dashboard-report report_date: 2026-03-12
+
+name: note-dashboard-report
+description: noteのダッシュボードから主要指標を取得し、日次レポートYAMLを保存する
+
+site: note
+
+params:
+  - name: report_date
+    description: "保存用日付（YYYY-MM-DD）"
+    required: true
+    example: "2026-03-12"
+  - name: period_label
+    description: "ダッシュボード上で選ぶ期間ラベル。未指定なら現在表示中の期間を使う"
+    required: false
+    example: "過去30日"
+  - name: notes
+    description: "定性メモ。なければ空でよい"
+    required: false
+    example: "新規記事公開直後でアクセスが偏っている"
+
+steps:
+  - action: navigate
+    description: "noteのダッシュボードにアクセスする"
+    url: "https://note.com/sitesettings/stats"
+
+  - action: login
+    description: "ログイン状態を確認し、未ログインなら自動ログインする"
+    site: "{{site}}"
+
+  - action: interact
+    description: |
+      アクセス状況タブを表示し、{{period_label}} が指定されている場合は期間フィルタをその表示に合わせる。
+      フィルタUIが見当たらない場合は現在表示中の期間をそのまま使う。
+
+  - action: verify
+    description: "ダッシュボードの主要指標が見える状態を確認し、スクリーンショットを撮る"
+
+  - action: interact
+    description: |
+      ダッシュボードの visible summary を読み取り、以下のフォーマットで step_results に記録する。
+      画面に存在しない指標は unknown を入れる。
+      top_articles は見えている範囲で 1-5 件まで拾う。
+
+      period: <表示期間>
+      page_views: <数値 or unknown>
+      visitors: <数値 or unknown>
+      likes: <数値 or unknown>
+      comments: <数値 or unknown>
+      followers: <数値 or unknown>
+      top_articles:
+        - title: <タイトル>
+          views: <数値 or unknown>
+          likes: <数値 or unknown>
+
+  - action: generate_text
+    description: "取得したダッシュボード情報を日次レポートYAMLへ整形する"
+    instruction: |
+      以下のダッシュボード読取結果を、noteダッシュボード日次レポートの YAML に整形する。
+      読取結果:
+      {{prev_result}}
+
+      メタデータ:
+      - report_date: {{report_date}}
+      - notes: {{notes}}
+
+      出力要件:
+      - YAML のみを返す
+      - unknown は文字列として残す
+      - top_articles が空なら [] にする
+      - notes が空なら空文字を入れる
+
+      出力フォーマット:
+      report_date: "{{report_date}}"
+      period: ""
+      metrics:
+        page_views: unknown
+        visitors: unknown
+        likes: unknown
+        comments: unknown
+        followers: unknown
+      top_articles: []
+      notes: ""
+
+  - action: command
+    description: "生成したダッシュボードレポートYAMLを knowledge/logs/note/dashboard に保存する"
+    command: |
+      $path = "knowledge/logs/note/dashboard/{{report_date}}.yaml"
+      $dir = Split-Path -Parent $path
+      if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+      @"
+      {{prev_result}}
+      "@ | Set-Content -Encoding UTF8 $path
+      Write-Output $path
+
+on_error: "スクリーンショットを撮って状況を報告する"

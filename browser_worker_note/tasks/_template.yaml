@@ -37,12 +37,13 @@ steps:
   - action: generate_text
     description: "文章を生成する"
     instruction: "どんな文章を生成するかの指示"
+    skill: god-writing
 
   # 組織的監査（多角レビュー）
   # - action: committee_review
   #   description: "生成した文章を組織的視点で段階的に監査する"
   #   target_text: "{{prev_result}}"
-  #   skill: copywriting
+  #   skill: god-writing
   #   review_pipeline:
   #     upstream:
   #       - role: Editor
@@ -52,9 +53,26 @@ steps:
   #       - role: Writer
   #     executor: CEO
 
+  # 画像生成（必要な場合）
+  - action: generate_image
+    when: "{{param_name}}"
+    description: "必要なら画像を生成する"
+    type: thumbnail
+    prompt: "{{param_name}} を説明するサムネイル"
+    topic: "{{param_name}}"
+    skill: image-generation
+
   # 画像アップロード
   - action: upload_image
-    description: "サムネイル画像をアップロードする"
+    when: "{{param_name}}"
+    description: "生成済み画像をそのままアップロードする"
+    file_path: "{{prev_result}}"
+
+  # コマンド実行（ログ保存・集計など）
+  - action: command
+    description: "必要ならローカルコマンドを実行する"
+    command: |
+      Write-Output "example"
 
   # 結果確認
   - action: verify
@@ -62,3 +80,10 @@ steps:
 
 # エラー時の対応
 on_error: "スクリーンショットを撮って状況を報告する"
+
+# 補足:
+# - すべての文字列フィールドで {{site}}, {{param_name}}, {{prev_result}}, {{step_results[N]}} を使える
+# - when を付けると、空文字 / false / 0 / none / null / skip のときそのステップをスキップできる
+# - upload_image は file_path が空なら自動でスキップされる
+# - 投稿レイヤーでは画像加工を行わず、生成レイヤーが出したファイルをそのまま添付する
+# - command はログ保存や補助スクリプト起動に使える

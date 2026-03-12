@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delvework Dashboard — 2026-03</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #08090d; --bg2: #0d0f15; --surface: #12141c; --surface2: #181b26;
+  --surface3: #1e2130; --border: #252839; --border2: #333658;
+  --text: #eaeaf0; --text2: #c8c8d0; --muted: #7c809a;
+  --accent: #6366f1; --accent2: #818cf8; --accent-bg: rgba(99,102,241,0.08);
+  --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+  --pink: #ec4899; --teal: #14b8a6; --orange: #f97316; --purple: #8b5cf6; --cyan: #06b6d4;
+  --header-h: 52px; --sidebar-w: 220px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI','Noto Sans JP',system-ui,sans-serif; font-size:13px; }
+
+/* ===== ヘッダー ===== */
+.header {
+  height:var(--header-h); background:var(--surface); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 20px; position:fixed; top:0; left:0; right:0; z-index:200;
+}
+.header-brand { font-weight:800; font-size:1rem; margin-right:32px; letter-spacing:-0.02em; color:var(--accent2); }
+.header-tabs { display:flex; gap:2px; }
+.header-tab {
+  background:none; border:none; color:var(--muted); font-size:0.8rem; font-weight:500;
+  padding:6px 16px; cursor:pointer; border-radius:6px; transition:all 0.15s;
+}
+.header-tab:hover { background:var(--surface2); color:var(--text2); }
+.header-tab.active { background:var(--accent-bg); color:var(--accent2); font-weight:700; }
+.header-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.account-select {
+  background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+  padding:5px 12px; border-radius:6px; font-size:0.78rem; cursor:pointer; outline:none;
+}
+.account-select:focus { border-color:var(--accent); }
+.header-meta { color:var(--muted); font-size:0.72rem; }
+
+/* ===== レイアウト ===== */
+.layout { display:flex; margin-top:var(--header-h); height:calc(100vh - var(--header-h)); }
+
+/* ===== サイドバー ===== */
+.sidebar {
+  width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border);
+  overflow-y:auto; flex-shrink:0; display:none; /* JS で active を付与 */
+}
+.sidebar.active { display:flex; flex-direction:column; }
+.sidebar-section { padding:16px 0 8px; }
+.sidebar-label { color:var(--muted); font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; padding:0 16px 6px; font-weight:700; }
+.side-item {
+  display:flex; align-items:center; gap:8px; padding:7px 16px; cursor:pointer;
+  color:var(--text2); font-size:0.8rem; transition:all 0.12s; border-left:3px solid transparent;
+}
+.side-item:hover { background:var(--surface2); color:var(--text); }
+.side-item.active { background:var(--accent-bg); color:var(--accent2); border-left-color:var(--accent); font-weight:600; }
+.side-icon { font-size:0.85rem; width:16px; text-align:center; flex-shrink:0; opacity:0.7; }
+.side-badge { margin-left:auto; background:var(--accent); color:#fff; font-size:0.6rem; padding:1px 6px; border-radius:8px; font-weight:700; }
+
+.sidebar-footer { margin-top:auto; padding:12px 16px; border-top:1px solid var(--border); }
+.sidebar-footer span { color:var(--muted); font-size:0.68rem; line-height:1.6; }
+
+/* ===== コンテンツ ===== */
+.content { flex:1; overflow-y:auto; background:var(--bg2); }
+.page { display:none; }
+.page.active { display:block; }
+.page-head { padding:20px 28px 14px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:50; }
+.page-head h2 { font-size:1.05rem; font-weight:700; }
+.page-head p { color:var(--muted); font-size:0.75rem; margin-top:2px; }
+.page-body { padding:20px 28px 40px; }
+
+/* ===== KPI ===== */
+.kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-bottom:20px; }
+.kpi { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.kpi-label { color:var(--muted); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px; }
+.kpi-val { font-size:1.4rem; font-weight:700; line-height:1.2; }
+.kpi-sub { color:var(--muted); font-size:0.68rem; margin-top:3px; }
+
+/* ===== セクション ===== */
+.sec { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:18px; margin-bottom:16px; }
+.sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.sec-head h3 { font-size:0.88rem; font-weight:600; }
+.sec-tag { color:var(--muted); font-size:0.7rem; background:var(--surface2); padding:2px 8px; border-radius:5px; }
+
+/* ===== チャート ===== */
+.ch-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+.ch-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:16px; }
+.ch-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.ch-box h4 { font-size:0.78rem; color:var(--muted); margin-bottom:8px; font-weight:500; }
+canvas { max-height:260px; }
+
+/* ===== テーブル ===== */
+.tw { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+th { text-align:left; color:var(--muted); font-weight:600; padding:7px 8px; border-bottom:2px solid var(--border); position:sticky; top:0; background:var(--surface); cursor:pointer; user-select:none; white-space:nowrap; }
+th:hover { color:var(--text); }
+th .sa { font-size:0.6rem; margin-left:2px; opacity:0.4; }
+td { padding:6px 8px; border-bottom:1px solid var(--border); }
+tr:hover td { background:rgba(99,102,241,0.03); }
+
+.bdg { display:inline-block; padding:1px 7px; border-radius:5px; font-size:0.68rem; font-weight:600; }
+.bdg-posted { background:rgba(34,197,94,0.1); color:var(--green); }
+.bdg-scheduled { background:rgba(234,179,8,0.1); color:var(--yellow); }
+.bdg-draft { background:rgba(124,128,154,0.1); color:var(--muted); }
+.bdg-s { background:rgba(239,68,68,0.1); color:var(--red); }
+.bdg-a { background:rgba(234,179,8,0.1); color:var(--yellow); }
+.bdg-b { background:rgba(34,197,94,0.1); color:var(--green); }
+.bdg-c { background:rgba(124,128,154,0.1); color:var(--muted); }
+
+/* ===== 空状態 ===== */
+.empty { text-align:center; padding:32px 16px; }
+.empty-icon { font-size:1.6rem; margin-bottom:8px; opacity:0.25; }
+.empty-title { color:var(--text2); font-size:0.88rem; font-weight:600; margin-bottom:4px; }
+.empty-desc { color:var(--muted); font-size:0.76rem; max-width:380px; margin:0 auto; line-height:1.5; }
+.empty-cmd { background:var(--surface2); color:var(--cyan); font-size:0.72rem; padding:6px 12px; border-radius:5px; display:inline-block; margin-top:8px; font-family:monospace; }
+
+/* ===== PF カード ===== */
+.pf-card { display:flex; align-items:center; gap:14px; padding:14px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; margin-bottom:10px; }
+.pf-icon { width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0; }
+.pf-stats { display:flex; gap:18px; flex-wrap:wrap; margin-top:4px; }
+.pf-st-l { color:var(--muted); font-size:0.66rem; text-transform:uppercase; }
+.pf-st-v { font-size:1rem; font-weight:700; }
+
+/* ===== カード系 ===== */
+.item-card { background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:11px 13px; margin-bottom:7px; }
+.item-title { font-weight:600; font-size:0.82rem; margin-bottom:3px; }
+.item-meta { color:var(--muted); font-size:0.7rem; }
+.item-tag { font-size:0.68rem; padding:1px 6px; border-radius:3px; background:var(--surface); margin-right:4px; }
+.issue-item { padding:7px 11px; border-left:3px solid var(--yellow); margin-bottom:5px; background:rgba(234,179,8,0.03); border-radius:0 5px 5px 0; font-size:0.8rem; }
+.issue-id { font-weight:700; margin-right:6px; color:var(--yellow); }
+
+@media (max-width:1100px) { .ch-grid,.ch-grid3 { grid-template-columns:1fr; } }
+@media (max-width:768px) { :root { --sidebar-w:180px; } .kpi-row { grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); } }
+</style>
+</head>
+<body>
+
+
+<header class="header">
+  <div class="header-brand">Delvework</div>
+  <div class="header-tabs">
+    <button class="header-tab active" data-platform="integrated">統合</button>
+    <button class="header-tab" data-platform="x">X</button>
+    <button class="header-tab" data-platform="note">note</button>
+  </div>
+  <div class="header-right">
+    <select class="account-select" id="tenant-select"><option value="default" selected>Delvework</option></select>
+    <span class="header-meta">2026-03 | <span id="gen-time"></span></span>
+  </div>
+</header>
+
+<div class="layout">
+  
+<aside class="sidebar active" id="sidebar-integrated">
+  <div class="sidebar-section">
+    <div class="sidebar-label">概況</div>
+    <div class="side-item active" data-page="i-summary"><span class="side-icon">&#9632;</span>サマリー</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">分析</div>
+    <div class="side-item" data-page="i-competitive"><span class="side-icon">&#9733;</span>競合分析</div>
+    <div class="side-item" data-page="i-trend"><span class="side-icon">&#9650;</span>トレンド観測<span class="side-badge">1</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">運用</div>
+    <div class="side-item" data-page="i-algorithm"><span class="side-icon">&#9881;</span>アルゴリズム監視</div>
+    <div class="side-item" data-page="i-system"><span class="side-icon">&#9998;</span>システム管理</div>
+  </div>
+  <div class="sidebar-footer"><span>統合ダッシュボード<br>全プラットフォーム横断</span></div>
+</aside>
+  
+<aside class="sidebar" id="sidebar-x">
+  <div class="sidebar-section">
+    <div class="sidebar-label">分析</div>
+    <div class="side-item active" data-page="x-overview"><span class="side-icon">&#9632;</span>概況<span class="side-badge">3</span></div>
+    <div class="side-item" data-page="x-patterns"><span class="side-icon">&#9830;</span>パターン分析</div>
+    <div class="side-item" data-page="x-pillars"><span class="side-icon">&#9878;</span>柱バランス</div>
+    <div class="side-item" data-page="x-timeslot"><span class="side-icon">&#9200;</span>曜日×時間帯</div>
+    <div class="side-item" data-page="x-images"><span class="side-icon">&#9635;</span>画像分析<span class="side-badge">1</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">データ</div>
+    <div class="side-item" data-page="x-posts"><span class="side-icon">&#9776;</span>投稿一覧</div>
+  </div>
+  <div class="sidebar-footer"><span>X（旧Twitter）<br>投稿パフォーマンス分析</span></div>
+</aside>
+  
+<aside class="sidebar" id="sidebar-note">
+  <div class="sidebar-section">
+    <div class="sidebar-label">分析</div>
+    <div class="side-item active" data-page="n-overview"><span class="side-icon">&#9632;</span>概況</div>
+    <div class="side-item" data-page="n-articles"><span class="side-icon">&#9776;</span>記事一覧</div>
+    <div class="side-item" data-page="n-categories"><span class="side-icon">&#9830;</span>カテゴリ別</div>
+    <div class="side-item" data-page="n-trends"><span class="side-icon">&#9650;</span>PV推移</div>
+  </div>
+  <div class="sidebar-footer"><span>note<br>記事パフォーマンス分析</span></div>
+</aside>
+
+  <main class="content">
+    
+<div class="page active" id="page-i-summary">
+  <div class="page-head"><h2>サマリー</h2><p>2026-03 — 全プラットフォーム横断のパフォーマンス概況</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">総投稿数</div><div class="kpi-val" style="color:var(--accent)">3</div></div>
+      <div class="kpi"><div class="kpi-label">総リーチ</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">投稿済</div><div class="kpi-val" style="color:var(--green)">2</div></div>
+      <div class="kpi"><div class="kpi-label">予約</div><div class="kpi-val" style="color:var(--yellow)">2</div></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>プラットフォーム別</h3><span class="sec-tag">2026-03</span></div>
+      <div class="pf-card">
+        <div class="pf-icon" style="background:rgba(29,161,242,0.1);color:#1da1f2">X</div>
+        <div><div style="font-weight:600;margin-bottom:5px">X（旧Twitter）</div>
+          <div class="pf-stats">
+            <div><div class="pf-st-l">投稿</div><div class="pf-st-v">3</div></div>
+            <div><div class="pf-st-l">インプレッション</div><div class="pf-st-v">0</div></div>
+            <div><div class="pf-st-l">ER</div><div class="pf-st-v" style="color:var(--green)">0.0%</div></div>
+            <div><div class="pf-st-l">リプライ</div><div class="pf-st-v" style="color:var(--blue)">0</div></div>
+            <div><div class="pf-st-l">いいね</div><div class="pf-st-v" style="color:var(--pink)">0</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pf-card">
+        <div class="pf-icon" style="background:rgba(45,204,112,0.1);color:#2dcc70">N</div>
+        <div><div style="font-weight:600;margin-bottom:5px">note</div>
+          <div class="pf-stats">
+            <div><div class="pf-st-l">記事</div><div class="pf-st-v">0</div></div>
+            <div><div class="pf-st-l">PV</div><div class="pf-st-v">0</div></div>
+            <div><div class="pf-st-l">スキ</div><div class="pf-st-v">0</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-grid">
+      <div class="ch-box"><h4>プラットフォーム別投稿数</h4><canvas id="c-sum-posts"></canvas></div>
+      <div class="ch-box"><h4>プラットフォーム別リーチ</h4><canvas id="c-sum-reach"></canvas></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-i-competitive">
+  <div class="page-head"><h2>競合分析</h2><p>競合アカウントの追跡・ベンチマーク比較</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>競合 / ベンチマークレポート</h3><span class="sec-tag">0件</span></div><div class="empty"><div class="empty-icon">&#9733;</div><div class="empty-title">競合データ未収集</div>
+<div class="empty-desc">X Search を使った競合分析が利用可能です。</div>
+<div class="empty-cmd">python scripts/x_search.py competitor --period 14d</div><br>
+<div class="empty-cmd">python scripts/x_search.py benchmark --period 30d</div></div></div>
+    <div class="sec"><div class="sec-head"><h3>設定状況</h3></div>
+      <div class="item-meta" style="padding:8px">追跡アカウント: 0件 — config/platforms.yaml の competitive.accounts で管理</div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-i-trend">
+  <div class="page-head"><h2>トレンド観測</h2><p>ジャンル全体の話題・フォーマット動向とネタ候補</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>トレンドレポート</h3><span class="sec-tag">1件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span class="item-tag">{'from': '2026-03-05', 'to': '2026-03-12'}</span><span class="item-tag">?</span></div></div></div>
+    <div class="sec"><div class="sec-head"><h3>アイデアストック</h3><span class="sec-tag">1件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span style="color:var(--green)">new</span> | trend</div></div></div>
+  </div>
+</div>
+<div class="page" id="page-i-algorithm">
+  <div class="page-head"><h2>アルゴリズム監視</h2><p>エンゲージメント率の推移・異常検知・仕様変更の追跡</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>ER 推移</h3><span class="sec-tag">週次</span></div><div class="empty"><div class="empty-icon">&#128200;</div><div class="empty-title">週次データ未蓄積</div>
+<div class="empty-desc">週次レポートを蓄積すると ER 推移と異常検知が表示されます。</div>
+<div class="empty-cmd">python scripts/x_report.py weekly</div></div></div>
+    
+    <div class="sec"><div class="sec-head"><h3>異常検知アラート</h3><span class="sec-tag">自動</span></div>
+      <div class="empty"><div class="empty-icon">&#9888;</div><div class="empty-title">異常なし</div>
+      <div class="empty-desc">12週分蓄積後、移動平均±2σ逸脱を自動検知。</div></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>仕様変更ログ</h3><span class="sec-tag">手動</span></div>
+      <div class="empty"><div class="empty-icon">&#128221;</div><div class="empty-title">記録なし</div>
+      <div class="empty-desc">knowledge/logs/x/algorithm/ に記録。</div></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-i-system">
+  <div class="page-head"><h2>システム管理</h2><p>タスク実行・エラー・ナレッジ更新の追跡</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>タスク実行ログ</h3></div><div class="tw"><table><thead><tr><th>タスク</th><th>日時</th><th>状態</th><th>所要時間</th></tr></thead><tbody><tr><td>dashboard-generate</td><td>2026-03-12T15:23:30</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>algorithm-monitor-check</td><td>2026-03-12T15:24:19</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr></tbody></table></div></div>
+    <div class="sec"><div class="sec-head"><h3>エラーログ</h3></div><div class="empty"><div class="empty-icon">&#10003;</div><div class="empty-title">エラーなし</div></div></div>
+    <div class="sec"><div class="sec-head"><h3>ナレッジ更新履歴</h3><span class="sec-tag">Git 連動</span></div>
+      <div class="empty"><div class="empty-icon">&#128218;</div><div class="empty-title">将来実装</div><div class="empty-desc">git log -- knowledge/ から自動取得予定。</div></div>
+    </div>
+  </div>
+</div>
+    
+<div class="page" id="page-x-overview">
+  <div class="page-head"><h2>X 概況</h2><p>2026-03 — 主要 KPI とハイライト</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">投稿数</div><div class="kpi-val" style="color:var(--accent)">3</div><div class="kpi-sub">当月</div></div>
+      <div class="kpi"><div class="kpi-label">インプレッション</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">エンゲージメント</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">平均 ER</div><div class="kpi-val" style="color:var(--green)">0.0%</div></div>
+      <div class="kpi"><div class="kpi-label">リプライ</div><div class="kpi-val" style="color:var(--blue)">0</div></div>
+      <div class="kpi"><div class="kpi-label">ブックマーク</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">RT</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">いいね</div><div class="kpi-val" style="color:var(--pink)">0</div></div>
+    </div>
+    <div class="ch-grid">
+      <div class="ch-box"><h4>パターン別スコア</h4><canvas id="c-xo-pattern"></canvas></div>
+      <div class="ch-box"><h4>3本柱バランス</h4><canvas id="c-xo-pillar"></canvas></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-patterns">
+  <div class="page-head"><h2>パターン分析</h2><p>10パターンの効果比較</p></div>
+  <div class="page-body">
+    <div class="ch-box" style="margin-bottom:16px"><h4>パターン別スコア（棒: スコア / 線: 使用回数）</h4><canvas id="c-xp-bar"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>パターン一覧</h3><span class="sec-tag">3種</span></div>
+      <div class="tw"><table><thead><tr><th>パターン</th><th>ランク</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>aruaru-kakeai</td><td><span class="bdg bdg-b">B</span></td><td>1</td><td>0.5</td></tr><tr><td>gachi-thread</td><td><span class="bdg bdg-c">C</span></td><td>1</td><td>0.5</td></tr><tr><td>sankagata-odai</td><td><span class="bdg bdg-s">S</span></td><td>1</td><td>0.5</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-pillars">
+  <div class="page-head"><h2>柱バランス</h2><p>3本柱の投稿数比率とスコア</p></div>
+  <div class="page-body">
+    <div class="ch-grid">
+      <div class="ch-box"><h4>3本柱バランス（投稿数）</h4><canvas id="c-xpil-donut"></canvas></div>
+      <div class="ch-box"><h4>柱別平均スコア</h4><canvas id="c-xpil-bar"></canvas></div>
+    </div>
+    <div class="ch-box" style="margin-bottom:16px"><h4>難易度分布</h4><canvas id="c-xpil-diff"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>柱別データ</h3></div>
+      <div class="tw"><table><thead><tr><th>柱</th><th>投稿数</th><th>比率</th><th>平均スコア</th></tr></thead><tbody><tr><td>やってみた実演</td><td>2</td><td>67%</td><td>0.5</td></tr><tr><td>埋もれた一次情報のフォーク</td><td>0</td><td>0%</td><td>0</td></tr><tr><td>制作の裏側公開</td><td>1</td><td>33%</td><td>0.5</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-timeslot">
+  <div class="page-head"><h2>曜日×時間帯</h2><p>エンゲージメントのタイミング分析</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>ヒートマップ</h3><span class="sec-tag">ER%</span></div><div id="x-heatmap"></div></div>
+  </div>
+</div>
+<div class="page" id="page-x-images">
+  <div class="page-head"><h2>画像分析</h2><p>画像タイプ別スコアと品質問題</p></div>
+  <div class="page-body">
+    <div class="ch-box" style="margin-bottom:16px"><h4>画像タイプ別スコア</h4><canvas id="c-ximg-bar"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>画像タイプ一覧</h3><span class="sec-tag">1種</span></div>
+      <div class="tw"><table><thead><tr><th>タイプ</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>diagram</td><td>3</td><td>0.5</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>画像品質問題</h3><span class="sec-tag">1件</span></div><div class="issue-item"><span class="issue-id">2026-03-16_月</span>キャラ被り発生（generate_image.py修正前の画像）</div></div>
+  </div>
+</div>
+<div class="page" id="page-x-posts">
+  <div class="page-head"><h2>投稿一覧</h2><p>全投稿のソート可能テーブル</p></div>
+  <div class="page-body">
+    <div class="sec">
+      <div class="tw">
+        <table id="x-tbl">
+          <thead><tr>
+            <th data-sort="str">日付<span class="sa"></span></th>
+            <th data-sort="str">曜日<span class="sa"></span></th>
+            <th data-sort="str">パターン<span class="sa"></span></th>
+            <th data-sort="str">ランク<span class="sa"></span></th>
+            <th data-sort="str">柱<span class="sa"></span></th>
+            <th data-sort="str">トピック<span class="sa"></span></th>
+            <th data-sort="str">状態<span class="sa"></span></th>
+            <th data-sort="num">IMP<span class="sa"></span></th>
+            <th data-sort="num">ER%<span class="sa"></span></th>
+            <th data-sort="num">いいね<span class="sa"></span></th>
+            <th data-sort="num">リプ<span class="sa"></span></th>
+            <th data-sort="num">RT<span class="sa"></span></th>
+            <th data-sort="num">BM<span class="sa"></span></th>
+            <th data-sort="num">スコア<span class="sa"></span></th>
+            <th data-sort="str">画像<span class="sa"></span></th>
+          </tr></thead>
+          <tbody id="x-tbl-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+    
+<div class="page" id="page-n-overview">
+  <div class="page-head"><h2>note 概況</h2><p>2026-03 — 記事パフォーマンス</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">記事数</div><div class="kpi-val" style="color:var(--accent)">0</div></div>
+      <div class="kpi"><div class="kpi-label">PV</div><div class="kpi-val">0</div></div>
+      <div class="kpi"><div class="kpi-label">スキ</div><div class="kpi-val" style="color:var(--green)">0</div></div>
+      <div class="kpi"><div class="kpi-label">コメント</div><div class="kpi-val" style="color:var(--blue)">0</div></div>
+    </div>
+    <div class="empty"><div class="empty-icon">&#128221;</div><div class="empty-title">記事データ未収集</div>
+    <div class="empty-desc">note-dashboard-report タスクを実行してデータを収集してください。</div></div>
+  </div>
+</div>
+<div class="page" id="page-n-articles">
+  <div class="page-head"><h2>記事一覧</h2><p>全記事の PV・スキ・コメント</p></div>
+  <div class="page-body"><div class="empty"><div class="empty-icon">&#9776;</div><div class="empty-title">データ蓄積後に表示</div></div></div>
+</div>
+<div class="page" id="page-n-categories">
+  <div class="page-head"><h2>カテゴリ別</h2><p>記事カテゴリごとの PV 比較</p></div>
+  <div class="page-body"><div class="empty"><div class="empty-icon">&#9830;</div><div class="empty-title">データ蓄積後に表示</div></div></div>
+</div>
+<div class="page" id="page-n-trends">
+  <div class="page-head"><h2>PV 推移</h2><p>記事公開後の PV 変化</p></div>
+  <div class="page-body"><div class="empty"><div class="empty-icon">&#9650;</div><div class="empty-title">データ蓄積後に表示</div></div></div>
+</div>
+  </main>
+</div>
+
+<script>
+
+document.getElementById('gen-time').textContent = new Date().toLocaleString('ja-JP');
+
+// ===== ナビゲーション =====
+const platforms = ['integrated','x','note'];
+const sidebarFirstPage = { integrated:'i-summary', x:'x-overview', note:'n-overview' };
+
+document.querySelectorAll('.header-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pf = btn.dataset.platform;
+    // ヘッダータブ
+    document.querySelectorAll('.header-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // サイドバー切替
+    document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+    document.getElementById('sidebar-' + pf).classList.add('active');
+    // 最初のページ表示
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + sidebarFirstPage[pf]).classList.add('active');
+    // サイドバーのアクティブ
+    document.getElementById('sidebar-' + pf).querySelectorAll('.side-item').forEach((s,i) => {
+      s.classList.toggle('active', i === 0);
+    });
+  });
+});
+
+document.querySelectorAll('.side-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const sidebar = item.closest('.sidebar');
+    sidebar.querySelectorAll('.side-item').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + item.dataset.page).classList.add('active');
+  });
+});
+
+// ===== チャート共通 =====
+const C = ['#6366f1','#22c55e','#eab308','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#8b5cf6','#06b6d4'];
+const bO = { responsive:true, maintainAspectRatio:true, plugins:{ legend:{ labels:{ color:'#7c809a', font:{ size:10 } } } } };
+const nL = { responsive:true, maintainAspectRatio:true, plugins:{ legend:{ display:false } } };
+const scX = { ticks:{ color:'#7c809a', font:{ size:9 } }, grid:{ display:false } };
+const scY = { ticks:{ color:'#7c809a' }, grid:{ color:'#252839' } };
+const scY2 = { position:'right', ticks:{ color:'#22c55e' }, grid:{ display:false } };
+
+function mkBar(id, labels, datasets, opts) {
+  const el = document.getElementById(id);
+  if (el && labels.length) new Chart(el, { type:'bar', data:{ labels, datasets }, options:opts });
+}
+function mkDonut(id, labels, data, colors) {
+  const el = document.getElementById(id);
+  if (el && labels.length) new Chart(el, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:0 }] }, options:{ ...bO, cutout:'55%' } });
+}
+
+// ===== サマリー =====
+mkBar('c-sum-posts', ['X','note'], [{ label:'投稿数', data:[3, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
+mkBar('c-sum-reach', ['X','note'], [{ label:'リーチ', data:[0, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
+
+// ===== X 概況 =====
+mkBar('c-xo-pattern', ["aruaru-kakeai", "gachi-thread", "sankagata-odai"], [
+  { label:'スコア', data:[0.5, 0.5, 0.5], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[1, 1, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:scY, y1:scY2 } });
+mkDonut('c-xo-pillar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [2, 0, 1], C.slice(0,3));
+
+// ===== X パターン =====
+mkBar('c-xp-bar', ["aruaru-kakeai", "gachi-thread", "sankagata-odai"], [
+  { label:'スコア', data:[0.5, 0.5, 0.5], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[1, 1, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:{ ...scY, title:{ display:true, text:'スコア', color:'#7c809a' } }, y1:{ ...scY2, title:{ display:true, text:'回数', color:'#22c55e' } } } });
+
+// ===== X 柱 =====
+mkDonut('c-xpil-donut', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [2, 0, 1], C.slice(0,3));
+mkBar('c-xpil-bar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [{ label:'平均スコア', data:[0.5, 0.5], backgroundColor:C.slice(0,3).map(c=>c+'cc'), borderRadius:6 }], { ...nL, indexAxis:'y', scales:{ x:scY, y:{ ...scX, ticks:{ ...scX.ticks, font:{ size:9 } } } } });
+mkDonut('c-xpil-diff', ["初心者", "中級", "上級"], [2, 1, 0], ['#22c55e','#eab308','#ef4444']);
+
+// ===== X 画像 =====
+mkBar('c-ximg-bar', ["diagram"], [
+  { label:'スコア', data:[0.5], backgroundColor:'#ec4899cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[3], backgroundColor:'#14b8a644', borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:scX, y:scY, y1:{ ...scY2, ticks:{ color:'#14b8a6' } } } });
+
+// ===== アルゴリズム ER 推移 =====
+(function() {
+  const el = document.getElementById('c-algo-er');
+  const weeks = [];
+  const ers = [];
+  if (el && weeks.length) {
+    new Chart(el, {
+      type:'line',
+      data:{ labels:weeks, datasets:[{ label:'平均 ER%', data:ers, borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,0.08)', fill:true, tension:0.3, pointRadius:4, pointBackgroundColor:'#6366f1' }] },
+      options:{ ...bO, scales:{ x:scX, y:{ ...scY, title:{ display:true, text:'ER%', color:'#7c809a' } } } }
+    });
+  }
+})();
+
+// ===== X ヒートマップ =====
+(function() {
+  const c = document.getElementById('x-heatmap');
+  if (!c) return;
+  const data = [{"day": "水", "time": "11:55", "er": 0.0, "imp": 0, "rep": 0}, {"day": "金", "time": "20:00", "er": 0.0, "imp": 0, "rep": 0}, {"day": "月", "time": "20:00", "er": 0.0, "imp": 0, "rep": 0}];
+  if (!data.length) { c.innerHTML = '<div class="empty"><div class="empty-desc">データなし</div></div>'; return; }
+  const days = ['月','火','水','木','金','土','日'];
+  const g = {};
+  data.forEach(d => { if(!g[d.day]) g[d.day]=[]; g[d.day].push(d); });
+  let h = '<table><thead><tr><th>曜日</th><th>時間帯</th><th>ER%</th><th>IMP</th><th>リプ</th></tr></thead><tbody>';
+  days.forEach(day => {
+    if (!g[day]) return;
+    g[day].forEach(d => {
+      const i = Math.min(d.er / 10, 1);
+      const bg = `rgba(99,102,241,${(i * 0.5 + 0.06).toFixed(2)})`;
+      h += `<tr><td style="font-weight:600">${day}</td><td>${d.time}</td><td style="background:${bg};border-radius:4px;text-align:center;font-weight:700">${d.er}%</td><td>${d.imp.toLocaleString()}</td><td>${d.rep}</td></tr>`;
+    });
+  });
+  h += '</tbody></table>';
+  c.innerHTML = h;
+})();
+
+// ===== X 投稿テーブル =====
+(function() {
+  const tbody = document.getElementById('x-tbl-body');
+  if (!tbody) return;
+  const data = [{"date": "2026-03-12", "day": "水", "pattern": "aruaru-kakeai", "pillar": "やってみた実演", "status": "posted", "topic": "AI効率化あるある（理想10分 vs 現実90分）", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}, {"date": "2026-03-13", "day": "金", "pattern": "gachi-thread", "pillar": "制作の裏側公開", "status": "scheduled", "topic": "AIがブラウザ操作して投稿してる裏側", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}, {"date": "2026-03-16", "day": "月", "pattern": "sankagata-odai", "pillar": "やってみた実演", "status": "scheduled", "topic": "AIで一番「これは助かった」って場面、なに？", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": "キャラ被り発生（generate_image.py修正前の画像）"}, {"date": "YYYY-MM-DD", "day": "月", "pattern": "xgrid-4koma", "pillar": "やってみた実演", "status": "posted", "topic": "", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}];
+  const rm = {"dotchi-taiketsu": "S", "sankagata-odai": "S", "quiz-senshuken": "S", "xgrid-4koma": "A", "prompt-ba": "A", "tsukaiwake-chart": "A", "aruaru-kakeai": "B", "dokuzetu-review": "B", "gachi-thread": "C", "trend-sokuhou": "C"};
+  data.forEach(t => {
+    const bc = t.status==='posted'?'bdg-posted':t.status==='scheduled'?'bdg-scheduled':'bdg-draft';
+    const rk = rm[t.pattern]||'?';
+    const rc = rk==='S'?'bdg-s':rk==='A'?'bdg-a':rk==='B'?'bdg-b':'bdg-c';
+    const row = document.createElement('tr');
+    row.innerHTML =
+      `<td>${t.date}</td><td>${t.day}</td><td>${t.pattern}</td>` +
+      `<td><span class="bdg ${rc}">${rk}</span></td><td>${t.pillar}</td>` +
+      `<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.topic}">${t.topic}</td>` +
+      `<td><span class="bdg ${bc}">${t.status}</span></td>` +
+      `<td>${t.impressions.toLocaleString()}</td><td>${t.engagement_rate}%</td>` +
+      `<td>${t.likes}</td><td>${t.replies}</td><td>${t.retweets}</td><td>${t.bookmarks}</td>` +
+      `<td style="font-weight:600">${t.composite_score}</td><td>${t.image_type}</td>`;
+    tbody.appendChild(row);
+  });
+  if (!data.length) tbody.innerHTML = '<tr><td colspan="15" class="empty" style="padding:16px">投稿データなし</td></tr>';
+})();
+
+// ===== テーブルソート =====
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const tbl = th.closest('table'), tbody = tbl.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const idx = Array.from(th.parentNode.children).indexOf(th);
+    const type = th.dataset.sort, asc = th.dataset.dir !== 'asc';
+    th.dataset.dir = asc ? 'asc' : 'desc';
+    th.parentNode.querySelectorAll('th').forEach(h => { if(h!==th) { h.dataset.dir=''; const s=h.querySelector('.sa'); if(s) s.textContent=''; } });
+    const sa = th.querySelector('.sa'); if(sa) sa.textContent = asc ? ' ▲' : ' ▼';
+    rows.sort((a,b) => {
+      let va = a.children[idx]?.textContent.trim()||'', vb = b.children[idx]?.textContent.trim()||'';
+      if (type==='num') { va=parseFloat(va.replace(/[,%]/g,''))||0; vb=parseFloat(vb.replace(/[,%]/g,''))||0; }
+      return va<vb ? (asc?-1:1) : va>vb ? (asc?1:-1) : 0;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  });
+});
+
+</script>
+</body>
+</html>

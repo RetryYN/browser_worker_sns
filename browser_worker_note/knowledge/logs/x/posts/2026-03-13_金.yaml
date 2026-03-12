@@ -1,0 +1,44 @@
+# X 個別レポート
+post_id: "2026-03-13_金"
+date: 2026-03-13
+day: "金"
+time: "20:00"
+status: "scheduled"
+
+pattern: "gachi-thread"
+pattern_rank: "C"
+difficulty: "中級"
+pillar: "制作の裏側公開"
+topic: "AIがブラウザ操作して投稿してる裏側"
+post_text: |
+  この投稿、実はAIがブラウザを操作して作ってます。
+
+  テーマ選定→本文生成→画像生成→予約投稿まで全部自動。
+  Playwright MCPでXの画面を直接操作してる。
+
+  ここまで来るのに設計3日かかってるけどね。
+post_url: ""
+characters: [aiko]
+
+image: "knowledge/data/images/note_diagram_ai-posting-flow_2026-03-12.jpg"
+image_type: "diagram"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "予約投稿（セッション7）。金曜夜ミサキ層ゴールデンタイム。裏側公開の柱。投稿後に x-post-report で計測"

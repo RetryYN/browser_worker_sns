@@ -1,0 +1,46 @@
+# X 個別レポート
+post_id: "2026-03-12_水"
+date: 2026-03-12
+day: "水"
+time: "11:55"
+status: "posted"
+
+pattern: "aruaru-kakeai"
+pattern_rank: "B"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "AI効率化あるある（理想10分 vs 現実90分）"
+post_text: |
+  AIで効率化！と思って始めたのに
+
+  理想: 10分で終わる
+  現実: プロンプト調整90分
+
+  でもその90分で「次から10分で終わる仕組み」ができてるんだよな
+
+  #AI活用
+post_url: "https://x.com/UaW6wnKW8c87193/status/2031928511871725955"
+characters: [aiko]
+
+image: "knowledge/data/images/note_diagram_ai効率化あるある_2026-03-12.jpg"
+image_type: "diagram"
+image_layout: "board"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "初のX実投稿。インラインフォームから即時投稿。metrics は x-post-report で計測予定"

@@ -15,6 +15,34 @@ params:
     description: 記事に付けるタグ（カンマ区切り）
     required: false
     example: "AI, エージェント, テクノロジー"
+  - name: source_url
+    description: 一次ソースURLや主たる参照元URL
+    required: false
+    example: "https://openai.com/blog/example"
+  - name: content_type
+    description: "content-types の推奨構成（例: C3 × P4）"
+    required: false
+    example: "C3 × P4"
+  - name: topic_main
+    description: メイントピック
+    required: false
+    example: "Claude"
+  - name: topic_sub
+    description: サブトピック（カンマ区切り）
+    required: false
+    example: "AIニュース, Claude Code"
+  - name: research_brief
+    description: リサーチで整理した要点メモ
+    required: false
+    example: "新機能の核心、読者価値、実演可否、注意点"
+  - name: verification_log
+    description: 検証ログのパス
+    required: false
+    example: "knowledge/logs/research/2026-03-12.md"
+  - name: thumbnail_path
+    description: 記事に添付するローカルのサムネイル画像パス
+    required: false
+    example: "knowledge/data/images/note_thumbnail_ai-agent_2026-03-12.jpg"
 
 steps:
   # ダッシュボードにアクセス
@@ -34,19 +62,48 @@ steps:
 
   # 記事本文を生成
   - action: generate_text
-    description: "{{theme}} をテーマに記事本文を生成する"
+    description: "{{theme}} をテーマに、note向けの長文記事ドラフトを構造化フォーマットで生成する"
     instruction: |
-      テーマ「{{theme}}」について、note向けの記事を生成する。
-      - 読者の関心を引く導入
-      - 具体例や体験を交えた本文
-      - 次のアクションにつながる結び
-    skill: copywriting
+      テーマ「{{theme}}」について、note向けの長文記事ドラフトを作成する。
+      読者は「AIを仕事に活かしたい実務者」を想定する。
+      利用可能な前提情報:
+      - 一次ソース: {{source_url}}
+      - 推奨構成: {{content_type}}
+      - メイントピック: {{topic_main}}
+      - サブトピック: {{topic_sub}}
+      - 調査メモ: {{research_brief}}
+      - 検証ログ: {{verification_log}}
+      出力は必ず以下の構造を守ること。
+
+      TITLE: 32文字以内のタイトル
+      LEAD:
+      2-3文の導入
+
+      BODY:
+      ## 見出し
+      本文
+
+      ## 見出し
+      本文
+
+      CTA:
+      次のアクションにつながる締めの一文
+
+      TAGS:
+      タグ候補をカンマ区切りで3-5個
+
+      要件:
+      - noteにそのまま貼り込める自然な日本語
+      - 導入は短く、本文は具体例と実務の示唆を含める
+      - 一次ソースや検証ログが渡されている場合は、それを優先して内容を構成する
+      - AIモデル名や数値を出す場合は断定しすぎず、根拠が曖昧なら留保表現にする
+    skill: god-writing
 
   # 組織的監査（多角レビュー）
   - action: committee_review
     description: "生成した記事を組織的視点で段階的に監査する"
     target_text: "{{prev_result}}"
-    skill: copywriting
+    skill: god-writing
     review_pipeline:
       upstream:
         - role: Editor
@@ -59,17 +116,28 @@ steps:
   # エディタに入力
   - action: interact
     description: |
-      以下の操作を行う:
-      1. タイトル欄に記事タイトルを入力する
-      2. 本文エリアに記事本文を入力する
-      3. タグ欄に {{tags}} を入力する
+      直前ステップの最終稿から TITLE / LEAD / BODY / CTA / TAGS を読み取り、以下の操作を行う:
+      1. タイトル欄に TITLE を入力する
+      2. 本文エリアには LEAD → BODY → CTA の順で入力する
+      3. タグ欄には、{{tags}} が指定されていればそれを優先し、未指定なら TAGS を入力する
 
   # サムネイル画像アップロード（任意）
   - action: upload_image
-    description: "サムネイル画像をアップロードする（画像がある場合）"
+    description: "{{thumbnail_path}} が指定されている場合のみサムネイル画像をアップロードする"
+    file_path: "{{thumbnail_path}}"
 
   # 公開前確認
   - action: verify
     description: "プレビューで記事の見た目を確認してスクリーンショットを撮る"
+
+  # 公開
+  - action: interact
+    description: |
+      公開確認ダイアログを開き、公開範囲と最終表示を確認したうえで記事を公開する。
+      公開直前にはユーザー最終承認を取り、承認後にのみ「公開する」を押す。
+
+  # 公開後確認
+  - action: verify
+    description: "公開完了画面または公開URLを確認し、公開後の見た目をスクリーンショットで記録する"
 
 on_error: "スクリーンショットを撮って状況を報告する"

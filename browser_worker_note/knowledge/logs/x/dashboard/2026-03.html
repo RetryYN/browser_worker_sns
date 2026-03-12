@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X Report Dashboard — 2026-03</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+    --text: #e4e4e7; --muted: #9ca3af; --accent: #6366f1;
+    --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; padding: 24px; }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-label { color: var(--muted); font-size: 0.8rem; margin-bottom: 4px; }
+  .card-value { font-size: 1.8rem; font-weight: 700; }
+  .card-value.accent { color: var(--accent); }
+  .card-value.green { color: var(--green); }
+  .card-value.blue { color: var(--blue); }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .section h2 { font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .chart-box h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
+  canvas { max-height: 250px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(99,102,241,0.05); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .badge-posted { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-scheduled { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .badge-draft { background: rgba(156,163,175,0.15); color: var(--muted); }
+  .issue-item { padding: 8px 12px; border-left: 3px solid var(--yellow); margin-bottom: 8px; background: rgba(234,179,8,0.05); border-radius: 0 6px 6px 0; }
+  .issue-id { font-weight: 600; margin-right: 8px; }
+  .empty { color: var(--muted); font-style: italic; padding: 16px; text-align: center; }
+  @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>X Report Dashboard</h1>
+<p class="subtitle">2026-03 | 生成: <span id="gen-time"></span></p>
+
+<!-- KPIs -->
+<div class="grid">
+  <div class="card"><div class="card-label">投稿数</div><div class="card-value accent">3</div></div>
+  <div class="card"><div class="card-label">インプレッション</div><div class="card-value">0</div></div>
+  <div class="card"><div class="card-label">エンゲージメント</div><div class="card-value">0</div></div>
+  <div class="card"><div class="card-label">平均 ER</div><div class="card-value green">0.0%</div></div>
+  <div class="card"><div class="card-label">リプライ</div><div class="card-value blue">0</div></div>
+  <div class="card"><div class="card-label">ブックマーク</div><div class="card-value">0</div></div>
+</div>
+
+<!-- Charts -->
+<div class="chart-row">
+  <div class="chart-box">
+    <h3>3本柱バランス</h3>
+    <canvas id="pillarChart"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>パターン別スコア</h3>
+    <canvas id="patternChart"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>難易度分布</h3>
+    <canvas id="diffChart"></canvas>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="section">
+  <h2>投稿タイムライン</h2>
+  <table>
+    <thead><tr><th>日付</th><th>曜日</th><th>パターン</th><th>柱</th><th>トピック</th><th>状態</th><th>IMP</th><th>ER%</th><th>Like</th><th>Rep</th><th>RT</th><th>BM</th></tr></thead>
+    <tbody id="timeline-body"></tbody>
+  </table>
+</div>
+
+<!-- Image Issues -->
+<div class="section">
+  <h2>画像品質問題</h2>
+  <div id="issues-container"></div>
+</div>
+
+<script>
+document.getElementById('gen-time').textContent = new Date().toLocaleString('ja-JP');
+
+// --- Charts ---
+const chartColors = ['#6366f1','#22c55e','#eab308','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#8b5cf6','#06b6d4'];
+const chartOpts = { responsive: true, plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } } };
+
+new Chart(document.getElementById('pillarChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"],
+    datasets: [{ data: [2, 0, 1], backgroundColor: chartColors.slice(0,3), borderWidth: 0 }]
+  },
+  options: { ...chartOpts, cutout: '55%' }
+});
+
+new Chart(document.getElementById('patternChart'), {
+  type: 'bar',
+  data: {
+    labels: ["aruaru-kakeai", "gachi-thread", "sankagata-odai"],
+    datasets: [
+      { label: 'Avg Score', data: [0.5, 0.5, 0.5], backgroundColor: '#6366f1cc', borderRadius: 4, yAxisID: 'y' },
+      { label: '使用回数', data: [1, 1, 1], backgroundColor: '#22c55e55', borderRadius: 4, yAxisID: 'y1' }
+    ]
+  },
+  options: {
+    ...chartOpts,
+    scales: {
+      x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { display: false } },
+      y: { position: 'left', ticks: { color: '#9ca3af' }, grid: { color: '#2a2d3a' } },
+      y1: { position: 'right', ticks: { color: '#22c55e' }, grid: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('diffChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ["初心者", "中級", "上級"],
+    datasets: [{ data: [2, 1, 0], backgroundColor: ['#22c55e','#eab308','#ef4444'], borderWidth: 0 }]
+  },
+  options: { ...chartOpts, cutout: '55%' }
+});
+
+// --- Timeline ---
+const timeline = [{"date": "2026-03-12", "day": "水", "pattern": "aruaru-kakeai", "pillar": "やってみた実演", "status": "posted", "topic": "AI効率化あるある（理想10分 vs 現実90分）", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "image_issues": ""}, {"date": "2026-03-13", "day": "金", "pattern": "gachi-thread", "pillar": "制作の裏側公開", "status": "scheduled", "topic": "AIがブラウザ操作して投稿してる裏側", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "image_issues": ""}, {"date": "2026-03-16", "day": "月", "pattern": "sankagata-odai", "pillar": "やってみた実演", "status": "scheduled", "topic": "AIで一番「これは助かった」って場面、なに？", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "image_issues": "キャラ被り発生（generate_image.py修正前の画像）"}, {"date": "YYYY-MM-DD", "day": "月", "pattern": "xgrid-4koma", "pillar": "やってみた実演", "status": "posted", "topic": "", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "image_issues": ""}];
+const tbody = document.getElementById('timeline-body');
+timeline.forEach(t => {
+  const badgeClass = t.status === 'posted' ? 'badge-posted' : t.status === 'scheduled' ? 'badge-scheduled' : 'badge-draft';
+  const row = document.createElement('tr');
+  row.innerHTML = `<td>${t.date}</td><td>${t.day}</td><td>${t.pattern}</td><td>${t.pillar}</td>` +
+    `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.topic}</td>` +
+    `<td><span class="badge ${badgeClass}">${t.status}</span></td>` +
+    `<td>${t.impressions.toLocaleString()}</td><td>${t.engagement_rate}%</td>` +
+    `<td>${t.likes}</td><td>${t.replies}</td><td>${t.retweets}</td><td>${t.bookmarks}</td>`;
+  tbody.appendChild(row);
+});
+if (!timeline.length) tbody.innerHTML = '<tr><td colspan="12" class="empty">投稿データなし</td></tr>';
+
+// --- Issues ---
+const issues = [{"post_id": "2026-03-16_月", "issue": "キャラ被り発生（generate_image.py修正前の画像）"}];
+const ic = document.getElementById('issues-container');
+if (issues.length) {
+  issues.forEach(i => {
+    const div = document.createElement('div');
+    div.className = 'issue-item';
+    div.innerHTML = `<span class="issue-id">${i.post_id}</span>${i.issue}`;
+    ic.appendChild(div);
+  });
+} else {
+  ic.innerHTML = '<div class="empty">問題なし</div>';
+}
+</script>
+</body>
+</html>

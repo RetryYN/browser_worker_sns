@@ -17,6 +17,7 @@
 
 import argparse
 import base64
+import re
 import sys
 from datetime import datetime
 from io import BytesIO
@@ -783,6 +784,15 @@ def _load_ref_as_base64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 
+def _slugify_topic(value: str | None) -> str:
+    """Windows でも安全に使えるファイル名用スラッグを作る"""
+    raw = (value or "untitled").strip().lower()
+    raw = re.sub(r'[\\/:*?"<>|]+', "-", raw)
+    raw = re.sub(r"\s+", "-", raw)
+    raw = re.sub(r"-{2,}", "-", raw).strip("-")
+    return raw or "untitled"
+
+
 # --- 用途別パラメータ ---
 
 PARAMS = {
@@ -919,6 +929,23 @@ def generate(image_type: str, prompt: str, topic: str | None = None,
     print(f"[generate] prompt: {prompt}")
     print(f"[generate] references: {[p.name for p in ref_paths]} ({len(ref_paths)} images)")
 
+    # マルチキャラ指定時: プロンプト内のアイコ専用記述を差し替え
+    if len(ref_chars) > 1 and image_type == "diagram":
+        char_list_str = ", ".join(ref_chars)
+        base_prompt = base_prompt.replace(
+            "The attached reference image shows Aiko's character design — reproduce her faithfully in every detail (pink twin-tails, purple idol outfit, gold star brooch, blue eyes, pixel blush). Character consistency is the top priority.",
+            f"The attached reference images show {len(ref_chars)} characters ({char_list_str}). Reproduce EACH character faithfully with their distinct colors and outfits. Do NOT merge or confuse characters.",
+        ).replace(
+            "- Aiko is placed SMALL at the bottom-left or bottom-right corner, in a pointing/presenting pose as an explainer. The character is NOT the main subject.",
+            f"- Place all {len(ref_chars)} characters around the diagram. Each character SMALL, clearly separated with space between them. Characters are NOT the main subject.",
+        ).replace(
+            "- Aiko (1 character only, not duplicated).",
+            f"- All {len(ref_chars)} characters ({char_list_str}), each appearing exactly ONCE. Each must have their own distinct appearance from the reference images.",
+        ).replace(
+            "- Character appears exactly ONCE, small, at the edge.",
+            f"- Each of the {len(ref_chars)} characters appears exactly ONCE, small, around the edges. No duplicates.",
+        )
+
     # プロンプト構成: リファレンスラベル + タイプ別ルール + ユーザーの依頼
     full_prompt = (
         f"[Reference Image]: {ref_label}\n\n"
@@ -947,7 +974,7 @@ def generate(image_type: str, prompt: str, topic: str | None = None,
     output_dir.mkdir(parents=True, exist_ok=True)
 
     date_str = datetime.now().strftime("%Y-%m-%d")
-    topic_slug = (topic or "untitled").replace(" ", "-").lower()
+    topic_slug = _slugify_topic(topic)
     prefix = "x" if (image_type.startswith("quiz-") or image_type == "x-grid") else "note"
     style_suffix = f"_{style}" if (image_type == "thumbnail" and style and style != "office") else ""
     filename = f"{prefix}_{image_type}{style_suffix}_{topic_slug}_{date_str}.jpg"
@@ -974,8 +1001,6 @@ def generate(image_type: str, prompt: str, topic: str | None = None,
 
 def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[Path]:
     """X投稿用4枚グリッド画像を独立生成する（Method C）"""
-    import re
-
     # --story をパース: "1:ラベル|説明 2:ラベル|説明 ..."
     panels = re.findall(r"(\d+):(.+?)\|(.+?)(?=\s+\d+:|$)", story)
     if len(panels) != 4:
@@ -984,7 +1009,7 @@ def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[P
     output_dir = ROOT / "knowledge" / "data" / "images"
     output_dir.mkdir(parents=True, exist_ok=True)
     date_str = datetime.now().strftime("%Y-%m-%d")
-    topic_slug = (topic or "untitled").replace(" ", "-").lower()
+    topic_slug = _slugify_topic(topic)
 
     saved = []
     for num, label, desc in panels:
@@ -1002,8 +1027,11 @@ def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[P
         final_name = f"x_grid_panel-{num}_{topic_slug}_{date_str}.jpg"
         final_path = output_dir / final_name
         path.rename(final_path)
+        with Image.open(final_path) as panel_img:
+            resized = panel_img.convert("RGB").resize((1200, 675), Image.LANCZOS)
+            resized.save(final_path, "JPEG", quality=90)
         saved.append(final_path)
-        print(f"[x-grid] saved: {final_path}")
+        print(f"[x-grid] saved: {final_path} (1200x675)")
 
     return saved
 

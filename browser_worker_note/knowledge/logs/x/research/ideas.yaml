@@ -1,0 +1,8 @@
+- source: trend
+  query: AI 業務効率化
+  date: '2026-03-12'
+  status: new
+  raw_ideas:
+  - 「2026年業務効率化AIツール完全比較表」：Gemini/Copilot/Perplexityの強み・弱みを表形式でまとめ、無料ダウンロードPDF配布。
+  - 「NotebookLM×GASでGoogle Workspace全自動化チュートリアル動画」：フォーム作成→Gmail送信のステップバイステップ、プロンプト公開で視聴者再現率向上。
+  - 「AIエージェントで1日業務を丸投げシミュレーション」：朝のタスク管理から議事録要約までOpenClaw風フロー再現、個人/企業向けカスタムテンプレ提供。

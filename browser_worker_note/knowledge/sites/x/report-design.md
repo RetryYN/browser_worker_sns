@@ -72,50 +72,65 @@ python scripts/x_report.py score knowledge/logs/x/posts/2026-03-10_月.yaml
 
 ### 取得指標
 
+**前提**: 無料プラン運用では X アナリティクス画面を使わず、個別投稿ページで見える数値だけを拾う。
+
 | 指標 | 取得方法 | 用途 |
 |------|---------|------|
-| インプレッション | Xアナリティクス | リーチ量。曜日×時間帯の正規化に使用 |
-| エンゲージメント数 | Xアナリティクス | 総反応量 |
-| エンゲージメント率 | エンゲージメント/インプレッション | quality_score の入力 |
-| いいね数 | Xアナリティクス | volume_score に使用 |
-| リプライ数 | Xアナリティクス | volume_score 最重要成分 |
-| RT数 | Xアナリティクス | 拡散力 |
-| ブックマーク数 | Xアナリティクス | 実用価値。保存=高関心シグナル |
-| プロフィールクリック | Xアナリティクス | フォロー導線 |
-| リンククリック | Xアナリティクス | note導線（該当時のみ） |
+| インプレッション | 個別投稿の views 表示 | リーチ量。曜日×時間帯の正規化に使用 |
+| エンゲージメント数 | 個別投稿の visible actions の合計 | 総反応量 |
+| エンゲージメント率 | `(likes + replies + retweets + bookmarks) / impressions * 100` | quality_score の入力 |
+| いいね数 | 個別投稿カウンタ | volume_score に使用 |
+| リプライ数 | 個別投稿カウンタ | volume_score 最重要成分 |
+| RT数 | 個別投稿カウンタ | 拡散力 |
+| ブックマーク数 | 個別投稿カウンタ（見えない場合は 0） | 実用価値。保存=高関心シグナル |
+| プロフィールクリック | 取得しない（0固定） | free運用では使わない |
+| リンククリック | 取得しない（0固定） | free運用では使わない |
 
 ### レポートフォーマット
 
 ```yaml
-# 個別レポート
-post_id: "YYYY-MM-DD_曜日"
-date: 2026-03-12
-day: 水
-time: "12:00"
-pattern: "xgrid-4koma"        # 10パターンのどれか
-pattern_rank: "A"              # S/A/B/C
-difficulty: "初心者"            # 初心者/中級/上級
-topic: "AIに議事録を頼んだら"
-characters: ["アイコ", "ChatGPT", "Claude", "Gemini"]
+# X 個別レポート
+post_id: "YYYY-MM-DD_曜"
+date: YYYY-MM-DD
+day: "月"
+time: "20:00"
+status: "posted"              # posted / scheduled / draft
 
+# --- コンテンツ情報 ---
+pattern: "xgrid-4koma"        # posting-strategy.md のパターンID
+pattern_rank: "A"             # S / A / B / C
+difficulty: "初心者"           # 初心者 / 中級 / 上級
+pillar: "やってみた実演"       # やってみた実演 / 埋もれた一次情報のフォーク / 制作の裏側公開
+topic: ""
+post_text: ""                 # 投稿本文（140字以内）
+post_url: ""                  # 投稿URL（posted 後に埋める）
+characters: []
+
+# --- 画像情報 ---
+image: ""                     # 画像ファイルパス
+image_type: "diagram"         # thumbnail / diagram / comic / x-grid / quiz-* 等
+image_layout: "default"       # default / board
+image_issues: ""              # 画像の品質問題（キャラ被り等）。なければ空
+
+# --- 指標（x-post-report で埋める） ---
 metrics:
   impressions: 0
-  engagements: 0
-  engagement_rate: 0.0         # %
+  engagements: 0              # likes + replies + retweets + bookmarks
+  engagement_rate: 0.0        # engagements / impressions * 100
   likes: 0
   replies: 0
   retweets: 0
   bookmarks: 0
-  profile_clicks: 0
-  link_clicks: 0
+  profile_clicks: 0           # free運用では取得しない
+  link_clicks: 0              # free運用では取得しない
 
-# 自動算出（後述のcomposite_score方式）
+# --- スコア（x_report.py で算出） ---
 scores:
-  volume_score: 0.0            # replies×10 + bookmarks×8 + retweets×3 + likes×1
-  quality_score: 0.0           # engagement_rate（%をそのまま使用）
-  composite_score: 0.0         # 正規化後 0.6×volume + 0.4×quality
+  volume_score: 0.0           # replies*10 + bookmarks*8 + retweets*3 + likes*1
+  quality_score: 0.0          # engagement_rate そのまま
+  composite_score: 0.0        # 正規化後 0.6*volume + 0.4*quality
 
-notes: ""                      # 定性メモ（バズった理由、失敗要因等）
+notes: ""                     # 定性メモ（バズった理由、失敗要因等）
 ```
 
 ### 保存先
@@ -147,17 +162,26 @@ summary:
 # 今週使った3パターンのスコア
 patterns_used:
   - pattern: "dotchi-taiketsu"
+    pillar: "やってみた実演"
     day: 月
     composite_score: 0.0
     engagement_rate: 0.0
   - pattern: "xgrid-4koma"
+    pillar: "埋もれた一次情報のフォーク"
     day: 水
     composite_score: 0.0
     engagement_rate: 0.0
   - pattern: "dokuzetu-review"
+    pillar: "制作の裏側公開"
     day: 金
     composite_score: 0.0
     engagement_rate: 0.0
+
+# 3本柱のバランス
+pillar_balance:
+  やってみた実演: { count: 1, ratio: 0.33 }
+  埋もれた一次情報のフォーク: { count: 1, ratio: 0.33 }
+  制作の裏側公開: { count: 1, ratio: 0.33 }
 
 # 曜日×時間帯の効果
 timeslot_performance:
@@ -167,6 +191,9 @@ timeslot_performance:
 
 best_post: "YYYY-MM-DD_曜日"
 worst_post: "YYYY-MM-DD_曜日"
+
+# 画像品質問題
+image_issues: []              # [{ post_id: "...", issue: "キャラ被り" }]
 
 # 定性振り返り
 wins: []
@@ -209,6 +236,17 @@ pattern_performance:
     avg_engagement_rate: 0.0
     trend: "—"                 # ↑ / → / ↓ / —（3ヶ月移動平均の方向）
 
+# 3本柱のバランス + 柱別スコア
+pillar_balance:
+  やってみた実演: { count: 0, ratio: 0.0 }
+  埋もれた一次情報のフォーク: { count: 0, ratio: 0.0 }
+  制作の裏側公開: { count: 0, ratio: 0.0 }
+
+pillar_performance:           # 柱別の平均 composite_score
+  やってみた実演: 0.0
+  埋もれた一次情報のフォーク: 0.0
+  制作の裏側公開: 0.0
+
 # 難易度バランス実績
 difficulty_balance:
   初心者: { count: 0, ratio: 0.0, target: 0.50 }
@@ -223,6 +261,9 @@ timeslot_monthly:
 
 top3: []
 worst3: []
+
+# 画像品質問題
+image_issues: []              # [{ post_id: "...", issue: "キャラ被り" }]
 
 # 入れ替え判定結果
 rotation_decision:
@@ -259,7 +300,7 @@ volume_score = replies × 10 + bookmarks × 8 + retweets × 3 + likes × 1
 #### quality_score（質の指標）
 
 ```
-quality_score = engagement_rate（%）
+quality_score = engagement_rate（個別投稿の可視指標から算出した %）
 ```
 
 インプレッションが少なくてもエンゲージメント率が高い＝刺さっている層がいる。
@@ -414,3 +455,5 @@ knowledge/logs/x/
 - キャラ別の人気度トラッキング（どのキャラが出ると composite_score が上がるか）
 - note記事との連動効果（X投稿→note流入の相関）
 - 季節タグ（年末年始・GW等の異常月を移動平均計算時に重みダウン）
+- 柱別の入れ替え判定（3本柱間のスコア差による配分最適化）
+- 画像品質問題の傾向分析（キャラ被り等の再発頻度トラッキング）

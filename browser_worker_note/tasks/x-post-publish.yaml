@@ -1,0 +1,53 @@
+# X 単発ポスト公開タスク
+# /run-task x-post-publish post_text: 新記事を公開しました
+
+name: x-post-publish
+description: Xに単発ポストを作成して投稿または予約投稿する
+
+site: x
+
+params:
+  - name: post_text
+    description: 投稿本文
+    required: true
+    example: "新しいnote記事を公開しました。AIエージェント運用の現場で見えた実務の勘所をまとめています。"
+  - name: image_path
+    description: 添付するローカル画像パス。生成済み画像をそのまま渡す前提で、投稿時のリサイズや変換は行わない
+    required: false
+    example: "knowledge/data/images/x_quiz-choice_ai-task_2026-03-12.jpg"
+  - name: schedule_at
+    description: 予約投稿する場合の日時（JST、YYYY-MM-DD HH:mm）
+    required: false
+    example: "2026-03-15 09:30"
+
+steps:
+  - action: navigate
+    description: "Xのホームにアクセスする"
+    url: "https://x.com/home"
+
+  - action: login
+    description: "ログイン状態を確認し、未ログインならログインする"
+    site: "{{site}}"
+
+  - action: interact
+    description: |
+      投稿フォームまたは投稿モーダルを開き、{{post_text}} を入力する。
+      {{schedule_at}} が指定されている場合は予約投稿UIも開ける状態まで進める。
+
+  - action: upload_image
+    description: "{{image_path}} が指定されている場合のみ、生成済み画像をそのまま添付する"
+    file_path: "{{image_path}}"
+
+  - action: verify
+    description: "投稿本文・添付画像・投稿ボタンの状態を確認してスクリーンショットを撮る"
+
+  - action: interact
+    description: |
+      {{schedule_at}} が未指定なら今すぐ投稿する。
+      {{schedule_at}} が指定されている場合は予約投稿UIで日時を設定し、予約投稿として確定する。
+      実行前にユーザー最終承認を取り、承認後にのみ確定ボタンを押す。
+
+  - action: verify
+    description: "投稿完了トースト、公開済みポスト、または予約完了状態を確認してスクリーンショットを撮る"
+
+on_error: "スクリーンショットを撮って状況を報告する"

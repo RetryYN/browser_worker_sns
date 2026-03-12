@@ -56,6 +56,8 @@ PATTERN_CONFIG: dict[str, dict[str, str]] = {
 
 DIFFICULTY_TARGETS = {"初心者": 0.50, "中級": 0.33, "上級": 0.17}
 
+PILLAR_NAMES = ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"]
+
 # ---------------------------------------------------------------------------
 # スコア算出
 # ---------------------------------------------------------------------------
@@ -348,6 +350,23 @@ def check_difficulty_balance(
 
 
 # ---------------------------------------------------------------------------
+# 柱別集計
+# ---------------------------------------------------------------------------
+def _count_pillars(posts: list[dict]) -> dict[str, dict]:
+    """3本柱の投稿数・比率を集計"""
+    counts: dict[str, int] = {p: 0 for p in PILLAR_NAMES}
+    for post in posts:
+        pillar = post.get("pillar", "")
+        if pillar in counts:
+            counts[pillar] += 1
+    total = sum(counts.values()) or 1
+    return {
+        p: {"count": c, "ratio": round(c / total, 2)}
+        for p, c in counts.items()
+    }
+
+
+# ---------------------------------------------------------------------------
 # YAML I/O
 # ---------------------------------------------------------------------------
 def load_posts(directory: Path, year_month: str | None = None) -> list[dict]:
@@ -436,6 +455,16 @@ def weekly_check(target_date: datetime | None = None) -> dict:
             "impressions": p["metrics"].get("impressions", 0),
         }
 
+    # 柱別分布
+    pillar_dist = _count_pillars(week_posts)
+
+    # 画像品質問題の集計
+    image_issues = [
+        {"post_id": p.get("post_id", "?"), "issue": p["image_issues"]}
+        for p in week_posts
+        if p.get("image_issues")
+    ]
+
     report = {
         "week": week_label,
         "period": f"{week_start.date()} ~ {week_end.date()}",
@@ -450,15 +479,18 @@ def weekly_check(target_date: datetime | None = None) -> dict:
         "patterns_used": [
             {
                 "pattern": p.get("pattern", "unknown"),
+                "pillar": p.get("pillar", "不明"),
                 "day": p.get("day", "?"),
                 "composite_score": round(p["scores"]["composite_score"], 4),
                 "engagement_rate": round(p["metrics"].get("engagement_rate", 0), 2),
             }
             for p in week_posts
         ],
+        "pillar_balance": pillar_dist,
         "timeslot_performance": ts_perf,
         "best_post": best.get("post_id", "?"),
         "worst_post": worst.get("post_id", "?"),
+        "image_issues": image_issues,
         "wins": [],
         "improvements": [],
         "discoveries": [],
@@ -477,7 +509,16 @@ def weekly_check(target_date: datetime | None = None) -> dict:
     print(f"ワースト: {worst.get('post_id', '?')} (score={worst['scores']['composite_score']:.4f})")
     print()
     for pu in report["patterns_used"]:
-        print(f"  {pu['day']} {pu['pattern']}: composite={pu['composite_score']:.4f}, ER={pu['engagement_rate']}%")
+        print(f"  {pu['day']} {pu['pattern']} [{pu['pillar']}]: composite={pu['composite_score']:.4f}, ER={pu['engagement_rate']}%")
+    print()
+    print("--- 柱別バランス ---")
+    for pil, info in pillar_dist.items():
+        print(f"  {pil}: {info['count']}件 ({info['ratio']:.0%})")
+    if image_issues:
+        print()
+        print("--- 画像品質問題 ---")
+        for issue in image_issues:
+            print(f"  {issue['post_id']}: {issue['issue']}")
     print(f"{'='*60}\n")
 
     save_yaml(WEEKLY_DIR / f"{week_label}.yaml", report)
@@ -610,6 +651,26 @@ def monthly_check(target_month: str | None = None) -> dict:
         for d, c in diff_count.items()
     }
 
+    # 柱別分布
+    pillar_dist = _count_pillars(posts)
+
+    # 柱別スコア平均
+    pillar_scores: dict[str, list[float]] = {}
+    for p, cs in zip(posts, composites):
+        pil = p.get("pillar", "不明")
+        pillar_scores.setdefault(pil, []).append(cs)
+    pillar_perf = {
+        pil: round(statistics.mean(scs), 4) if scs else 0.0
+        for pil, scs in pillar_scores.items()
+    }
+
+    # 画像品質問題の集計
+    image_issues_monthly = [
+        {"post_id": p.get("post_id", "?"), "issue": p["image_issues"]}
+        for p in posts
+        if p.get("image_issues")
+    ]
+
     # タイムスロット
     ts_monthly: dict[str, dict] = {}
     for p in posts:
@@ -648,10 +709,13 @@ def monthly_check(target_month: str | None = None) -> dict:
         "pattern_performance": pattern_perf,
         "pattern_adjusted_scores": {k: round(v, 4) for k, v in adjusted_current.items()},
         "pattern_ranks": {k: round(v, 1) for k, v in ranks.items()},
+        "pillar_balance": pillar_dist,
+        "pillar_performance": pillar_perf,
         "difficulty_balance": diff_balance,
         "timeslot_monthly": ts_result,
         "top3": top3,
         "worst3": worst3,
+        "image_issues": image_issues_monthly,
         "rotation_decision": decision,
     }
 
@@ -688,10 +752,22 @@ def monthly_check(target_month: str | None = None) -> dict:
             print(f"    {o}")
     print()
 
+    print("--- 柱別バランス ---")
+    for pil, info in pillar_dist.items():
+        score = pillar_perf.get(pil, 0.0)
+        print(f"  {pil}: {info['count']}件 ({info['ratio']:.0%}) score={score:.4f}")
+    print()
+
     print("--- 難易度バランス ---")
     for d, info in diff_balance.items():
         status = "OK" if abs(info["ratio"] - info["target"]) < 0.15 else "要調整"
         print(f"  {d}: {info['count']}件 ({info['ratio']:.0%}) 目標{info['target']:.0%} [{status}]")
+
+    if image_issues_monthly:
+        print()
+        print("--- 画像品質問題 ---")
+        for issue in image_issues_monthly:
+            print(f"  {issue['post_id']}: {issue['issue']}")
     print(f"{'='*60}\n")
 
     save_yaml(MONTHLY_DIR / f"{month}.yaml", report)
@@ -722,6 +798,310 @@ def score_single(yaml_path: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# ダッシュボード HTML 生成
+# ---------------------------------------------------------------------------
+DASHBOARD_DIR = ROOT / "knowledge" / "logs" / "x" / "dashboard"
+
+
+def _json_dumps(obj: Any) -> str:
+    """JSON 文字列化（テンプレート埋め込み用）"""
+    import json
+    return json.dumps(obj, ensure_ascii=False)
+
+
+def generate_dashboard(target_month: str | None = None) -> Path:
+    """投稿データからスタンドアロン HTML ダッシュボードを生成"""
+    import json
+
+    month = target_month or datetime.now().strftime("%Y-%m")
+    posts = load_posts(POSTS_DIR, year_month=month)
+    all_posts = load_posts(POSTS_DIR)  # 全期間（タイムライン用）
+
+    # スコア算出
+    if posts:
+        composites = calc_composite_scores(posts)
+        for p, cs in zip(posts, composites):
+            p.setdefault("scores", {})
+            p["scores"]["volume_score"] = round(calc_volume_score(p["metrics"]), 1)
+            p["scores"]["quality_score"] = round(calc_quality_score(p["metrics"]), 2)
+            p["scores"]["composite_score"] = round(cs, 4)
+
+    # 集計データ
+    pillar_dist = _count_pillars(posts) if posts else {}
+    total_imp = sum(p["metrics"].get("impressions", 0) for p in posts)
+    total_eng = sum(p["metrics"].get("engagements", 0) for p in posts)
+    total_rep = sum(p["metrics"].get("replies", 0) for p in posts)
+    total_bkm = sum(p["metrics"].get("bookmarks", 0) for p in posts)
+    avg_er = (
+        statistics.mean([p["metrics"].get("engagement_rate", 0) for p in posts])
+        if posts else 0.0
+    )
+
+    # パターン別
+    pattern_data: dict[str, list[float]] = {}
+    for p in posts:
+        pat = p.get("pattern", "unknown")
+        pattern_data.setdefault(pat, []).append(
+            p.get("scores", {}).get("composite_score", 0)
+        )
+    pattern_summary = [
+        {"pattern": pat, "count": len(scores), "avg_score": round(statistics.mean(scores), 4)}
+        for pat, scores in sorted(pattern_data.items())
+    ] if pattern_data else []
+
+    # 難易度
+    diff_count: dict[str, int] = {"初心者": 0, "中級": 0, "上級": 0}
+    for p in posts:
+        d = p.get("difficulty", "中級")
+        diff_count[d] = diff_count.get(d, 0) + 1
+
+    # 投稿タイムライン（全期間）
+    timeline = [
+        {
+            "date": str(p.get("date", "")),
+            "day": p.get("day", "?"),
+            "pattern": p.get("pattern", "?"),
+            "pillar": p.get("pillar", "?"),
+            "status": p.get("status", "?"),
+            "topic": p.get("topic", ""),
+            "impressions": p.get("metrics", {}).get("impressions", 0),
+            "engagement_rate": p.get("metrics", {}).get("engagement_rate", 0),
+            "likes": p.get("metrics", {}).get("likes", 0),
+            "replies": p.get("metrics", {}).get("replies", 0),
+            "retweets": p.get("metrics", {}).get("retweets", 0),
+            "bookmarks": p.get("metrics", {}).get("bookmarks", 0),
+            "image_issues": p.get("image_issues", ""),
+        }
+        for p in all_posts
+    ]
+
+    # 画像品質問題
+    issues = [
+        {"post_id": p.get("post_id", "?"), "issue": p.get("image_issues", "")}
+        for p in all_posts
+        if p.get("image_issues")
+    ]
+
+    html = _build_dashboard_html(
+        month=month,
+        total_posts=len(posts),
+        total_imp=total_imp,
+        total_eng=total_eng,
+        total_rep=total_rep,
+        total_bkm=total_bkm,
+        avg_er=round(avg_er, 2),
+        pillar_dist=pillar_dist,
+        pattern_summary=pattern_summary,
+        diff_count=diff_count,
+        timeline=timeline,
+        issues=issues,
+    )
+
+    DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = DASHBOARD_DIR / f"{month}.html"
+    out_path.write_text(html, encoding="utf-8")
+    print(f"ダッシュボード生成: {out_path}")
+    return out_path
+
+
+def _build_dashboard_html(
+    *,
+    month: str,
+    total_posts: int,
+    total_imp: int,
+    total_eng: int,
+    total_rep: int,
+    total_bkm: int,
+    avg_er: float,
+    pillar_dist: dict,
+    pattern_summary: list,
+    diff_count: dict,
+    timeline: list,
+    issues: list,
+) -> str:
+    import json
+
+    pillar_labels = json.dumps(list(pillar_dist.keys()), ensure_ascii=False)
+    pillar_counts = json.dumps([v["count"] for v in pillar_dist.values()])
+
+    pattern_labels = json.dumps([p["pattern"] for p in pattern_summary], ensure_ascii=False)
+    pattern_scores = json.dumps([p["avg_score"] for p in pattern_summary])
+    pattern_counts_data = json.dumps([p["count"] for p in pattern_summary])
+
+    diff_labels = json.dumps(list(diff_count.keys()), ensure_ascii=False)
+    diff_values = json.dumps(list(diff_count.values()))
+
+    timeline_json = json.dumps(timeline, ensure_ascii=False)
+    issues_json = json.dumps(issues, ensure_ascii=False)
+
+    return f"""<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X Report Dashboard — {month}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {{
+    --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+    --text: #e4e4e7; --muted: #9ca3af; --accent: #6366f1;
+    --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+  }}
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{ background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; padding: 24px; }}
+  h1 {{ font-size: 1.5rem; margin-bottom: 8px; }}
+  .subtitle {{ color: var(--muted); margin-bottom: 24px; font-size: 0.9rem; }}
+  .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  .card {{ background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }}
+  .card-label {{ color: var(--muted); font-size: 0.8rem; margin-bottom: 4px; }}
+  .card-value {{ font-size: 1.8rem; font-weight: 700; }}
+  .card-value.accent {{ color: var(--accent); }}
+  .card-value.green {{ color: var(--green); }}
+  .card-value.blue {{ color: var(--blue); }}
+  .section {{ background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }}
+  .section h2 {{ font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+  .chart-row {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }}
+  .chart-box {{ background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }}
+  .chart-box h3 {{ font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }}
+  canvas {{ max-height: 250px; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }}
+  th {{ text-align: left; color: var(--muted); font-weight: 600; padding: 8px 12px; border-bottom: 1px solid var(--border); }}
+  td {{ padding: 8px 12px; border-bottom: 1px solid var(--border); }}
+  tr:hover td {{ background: rgba(99,102,241,0.05); }}
+  .badge {{ display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }}
+  .badge-posted {{ background: rgba(34,197,94,0.15); color: var(--green); }}
+  .badge-scheduled {{ background: rgba(234,179,8,0.15); color: var(--yellow); }}
+  .badge-draft {{ background: rgba(156,163,175,0.15); color: var(--muted); }}
+  .issue-item {{ padding: 8px 12px; border-left: 3px solid var(--yellow); margin-bottom: 8px; background: rgba(234,179,8,0.05); border-radius: 0 6px 6px 0; }}
+  .issue-id {{ font-weight: 600; margin-right: 8px; }}
+  .empty {{ color: var(--muted); font-style: italic; padding: 16px; text-align: center; }}
+  @media (max-width: 900px) {{ .chart-row {{ grid-template-columns: 1fr; }} }}
+</style>
+</head>
+<body>
+
+<h1>X Report Dashboard</h1>
+<p class="subtitle">{month} | 生成: <span id="gen-time"></span></p>
+
+<!-- KPIs -->
+<div class="grid">
+  <div class="card"><div class="card-label">投稿数</div><div class="card-value accent">{total_posts}</div></div>
+  <div class="card"><div class="card-label">インプレッション</div><div class="card-value">{total_imp:,}</div></div>
+  <div class="card"><div class="card-label">エンゲージメント</div><div class="card-value">{total_eng:,}</div></div>
+  <div class="card"><div class="card-label">平均 ER</div><div class="card-value green">{avg_er}%</div></div>
+  <div class="card"><div class="card-label">リプライ</div><div class="card-value blue">{total_rep}</div></div>
+  <div class="card"><div class="card-label">ブックマーク</div><div class="card-value">{total_bkm}</div></div>
+</div>
+
+<!-- Charts -->
+<div class="chart-row">
+  <div class="chart-box">
+    <h3>3本柱バランス</h3>
+    <canvas id="pillarChart"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>パターン別スコア</h3>
+    <canvas id="patternChart"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>難易度分布</h3>
+    <canvas id="diffChart"></canvas>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="section">
+  <h2>投稿タイムライン</h2>
+  <table>
+    <thead><tr><th>日付</th><th>曜日</th><th>パターン</th><th>柱</th><th>トピック</th><th>状態</th><th>IMP</th><th>ER%</th><th>Like</th><th>Rep</th><th>RT</th><th>BM</th></tr></thead>
+    <tbody id="timeline-body"></tbody>
+  </table>
+</div>
+
+<!-- Image Issues -->
+<div class="section">
+  <h2>画像品質問題</h2>
+  <div id="issues-container"></div>
+</div>
+
+<script>
+document.getElementById('gen-time').textContent = new Date().toLocaleString('ja-JP');
+
+// --- Charts ---
+const chartColors = ['#6366f1','#22c55e','#eab308','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#8b5cf6','#06b6d4'];
+const chartOpts = {{ responsive: true, plugins: {{ legend: {{ labels: {{ color: '#9ca3af', font: {{ size: 11 }} }} }} }} }};
+
+new Chart(document.getElementById('pillarChart'), {{
+  type: 'doughnut',
+  data: {{
+    labels: {pillar_labels},
+    datasets: [{{ data: {pillar_counts}, backgroundColor: chartColors.slice(0,3), borderWidth: 0 }}]
+  }},
+  options: {{ ...chartOpts, cutout: '55%' }}
+}});
+
+new Chart(document.getElementById('patternChart'), {{
+  type: 'bar',
+  data: {{
+    labels: {pattern_labels},
+    datasets: [
+      {{ label: 'Avg Score', data: {pattern_scores}, backgroundColor: '#6366f1cc', borderRadius: 4, yAxisID: 'y' }},
+      {{ label: '使用回数', data: {pattern_counts_data}, backgroundColor: '#22c55e55', borderRadius: 4, yAxisID: 'y1' }}
+    ]
+  }},
+  options: {{
+    ...chartOpts,
+    scales: {{
+      x: {{ ticks: {{ color: '#9ca3af', font: {{ size: 9 }} }}, grid: {{ display: false }} }},
+      y: {{ position: 'left', ticks: {{ color: '#9ca3af' }}, grid: {{ color: '#2a2d3a' }} }},
+      y1: {{ position: 'right', ticks: {{ color: '#22c55e' }}, grid: {{ display: false }} }}
+    }}
+  }}
+}});
+
+new Chart(document.getElementById('diffChart'), {{
+  type: 'doughnut',
+  data: {{
+    labels: {diff_labels},
+    datasets: [{{ data: {diff_values}, backgroundColor: ['#22c55e','#eab308','#ef4444'], borderWidth: 0 }}]
+  }},
+  options: {{ ...chartOpts, cutout: '55%' }}
+}});
+
+// --- Timeline ---
+const timeline = {timeline_json};
+const tbody = document.getElementById('timeline-body');
+timeline.forEach(t => {{
+  const badgeClass = t.status === 'posted' ? 'badge-posted' : t.status === 'scheduled' ? 'badge-scheduled' : 'badge-draft';
+  const row = document.createElement('tr');
+  row.innerHTML = `<td>${{t.date}}</td><td>${{t.day}}</td><td>${{t.pattern}}</td><td>${{t.pillar}}</td>` +
+    `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${{t.topic}}</td>` +
+    `<td><span class="badge ${{badgeClass}}">${{t.status}}</span></td>` +
+    `<td>${{t.impressions.toLocaleString()}}</td><td>${{t.engagement_rate}}%</td>` +
+    `<td>${{t.likes}}</td><td>${{t.replies}}</td><td>${{t.retweets}}</td><td>${{t.bookmarks}}</td>`;
+  tbody.appendChild(row);
+}});
+if (!timeline.length) tbody.innerHTML = '<tr><td colspan="12" class="empty">投稿データなし</td></tr>';
+
+// --- Issues ---
+const issues = {issues_json};
+const ic = document.getElementById('issues-container');
+if (issues.length) {{
+  issues.forEach(i => {{
+    const div = document.createElement('div');
+    div.className = 'issue-item';
+    div.innerHTML = `<span class="issue-id">${{i.post_id}}</span>${{i.issue}}`;
+    ic.appendChild(div);
+  }});
+}} else {{
+  ic.innerHTML = '<div class="empty">問題なし</div>';
+}}
+</script>
+</body>
+</html>"""
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def main() -> None:
@@ -737,15 +1117,36 @@ def main() -> None:
     s = sub.add_parser("score", help="単発スコア算出")
     s.add_argument("file", help="個別レポート YAML のパス")
 
+    d = sub.add_parser("dashboard", help="HTML ダッシュボード生成")
+    d.add_argument("--month", help="対象月 (YYYY-MM)", default=None)
+    d.add_argument("--open", action="store_true", help="生成後にブラウザで開く")
+
     args = parser.parse_args()
 
     if args.command == "weekly":
-        date = datetime.strptime(args.date, "%Y-%m-%d") if args.date else None
-        weekly_check(date)
+        from system_logger import log_task
+        with log_task("x-report-weekly") as task:
+            date = datetime.strptime(args.date, "%Y-%m-%d") if args.date else None
+            result = weekly_check(date)
+            if not result:
+                task.note("投稿データなし")
+            else:
+                task.note(f"投稿数: {len(result.get('patterns_used', []))}")
     elif args.command == "monthly":
-        monthly_check(args.month)
+        from system_logger import log_task
+        with log_task("x-report-monthly") as task:
+            result = monthly_check(args.month)
+            if not result:
+                task.note("投稿データなし")
+            else:
+                task.note(f"投稿数: {result.get('total_posts', 0)}")
     elif args.command == "score":
         score_single(args.file)
+    elif args.command == "dashboard":
+        out = generate_dashboard(args.month)
+        if args.open:
+            import webbrowser
+            webbrowser.open(str(out))
     else:
         parser.print_help()
 

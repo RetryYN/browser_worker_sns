@@ -197,12 +197,27 @@ def generate_character(name: str) -> Path:
 
     # aiko自身を生成する場合は別キャラをスタイル参照にする
     if name == "aiko":
-        style_ref_path = CHARS_DIR / "claude" / "ref_idol.jpg"
-        ref_label = (
-            "[Image 1 - STYLE REFERENCE]: This is another team member. "
-            "Match the EXACT pixel art style, proportions, shading, and quality level. "
-            "Generate a DIFFERENT character (described below) in the SAME style."
-        )
+        fallback_ref = CHARS_DIR / "claude" / "ref_idol.jpg"
+        if fallback_ref.exists():
+            style_ref_path = fallback_ref
+            ref_label = (
+                "[Image 1 - STYLE REFERENCE]: This is another team member. "
+                "Match the EXACT pixel art style, proportions, shading, and quality level. "
+                "Generate a DIFFERENT character (described below) in the SAME style."
+            )
+        elif AIKO_REF.exists():
+            style_ref_path = AIKO_REF
+            ref_label = (
+                "[Image 1 - REFERENCE]: This is Aiko's previous reference image. "
+                "Preserve the same identity, style, proportions, shading, and overall quality "
+                "while refreshing the render."
+            )
+        else:
+            raise FileNotFoundError(
+                "No style reference found for Aiko. Expected either "
+                "'knowledge/characters/claude/ref_idol.jpg' or "
+                "'knowledge/characters/aiko/ref_idol.jpg'."
+            )
     else:
         style_ref_path = AIKO_REF
         ref_label = (

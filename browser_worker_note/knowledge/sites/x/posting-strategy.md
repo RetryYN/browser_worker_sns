@@ -219,6 +219,25 @@
 
 ---
 
+## パターン ID一覧（コマンド・レポート用）
+
+コマンド入力時は**必ず ID 形式**を使う。日本語名は説明用。
+
+| # | 日本語名 | ID | ランク | 推奨 image_type | 推奨 layout |
+|---|---------|----|----|-----------------|-------------|
+| 1 | どっち派？対決 | `dotchi-taiketsu` | S | diagram | board |
+| 2 | 参加型お題 | `sankagata-odai` | S | diagram | — |
+| 3 | AI選手権クイズ | `quiz-senshuken` | S | quiz-choice | — |
+| 4 | Xグリッド4コマ | `xgrid-4koma` | A | x-grid | — |
+| 5 | プロンプト before/after | `prompt-ba` | A | quiz-ba | — |
+| 6 | 使い分けチャート図解 | `tsukaiwake-chart` | A | diagram | board |
+| 7 | あるある掛け合い | `aruaru-kakeai` | B | diagram | — |
+| 8 | 一言毒舌レビュー | `dokuzetu-review` | B | diagram | — |
+| 9 | ガチ解説スレッド | `gachi-thread` | C | diagram | board |
+| 10 | トレンド速報キャラ実況 | `trend-sokuhou` | C | diagram | — |
+
+---
+
 ## ネタストック管理
 
 ネタは `knowledge/x-content-queue.md`（別ファイル）で管理。

@@ -1,0 +1,126 @@
+# プラットフォーム & テナント設定
+# 統合ダッシュボード・競合分析・レポート生成で参照する
+
+# --- テナント定義 ---
+# マルチテナント時はここにテナントを追加
+# シングルテナントの場合は default のみ使用
+tenants:
+  default:
+    name: "Delvework"
+    platforms: [x, note]
+    # logs_dir を指定しない場合は knowledge/logs/<platform>/ を使用
+    # マルチテナント時: knowledge/logs/<tenant_id>/<platform>/
+
+# --- プラットフォーム定義 ---
+platforms:
+  x:
+    name: "X（旧Twitter）"
+    short_name: "X"
+    enabled: true
+    report_script: "scripts/x_report.py"
+    api:
+      provider: "xai"              # xAI API（Grok + X Search ツール）
+      env_key: "XAI_API_KEY"       # .env の環境変数名
+      base_url: "https://api.x.ai/v1"
+      model: "grok-4-1-fast"       # X Search ツールは grok-4 ファミリーのみ対応
+      # 用途:
+      #   - 競合アカウントの投稿テーマ・傾向の定性分析（X Search）
+      #   - トレンド検索（キーワード/セマンティック）
+      #   - ジャンル動向の要約
+      # 数値取得（エンゲージメント等）は Playwright ブラウザ巡回で実施
+      # X API v2 は使わない（認証・レート制限が煩雑）
+      cost_per_1k_calls: 5.0       # X Search ツール料金（USD）
+    metrics:
+      primary: [impressions, likes, replies, retweets, bookmarks]
+      derived: [engagement_rate, volume_score, quality_score, composite_score]
+    competitive:
+      enabled: true
+      collection_frequency: "monthly"
+      accounts:
+        # - id: "account_handle"
+        #   name: "表示名"
+        #   category: "AI活用系"      # 同ジャンル / 異ジャンル参考
+        []
+    trend_watch:
+      enabled: true
+      sources: []                     # external-sources.md と連携
+
+  note:
+    name: "note"
+    short_name: "note"
+    enabled: true
+    # report_script: "scripts/note_report.py"  # TBD: 未実装。note-dashboard-report.yaml で直接YAML生成中
+    metrics:
+      primary: [page_views, visitors, likes, comments]
+      derived: []                     # TBD: note用スコア設計後
+    competitive:
+      enabled: false                  # 将来有効化
+      collection_frequency: "monthly"
+      accounts: []
+    trend_watch:
+      enabled: false
+
+  # --- 将来のプラットフォーム ---
+  # instagram:
+  #   name: "Instagram"
+  #   short_name: "Insta"
+  #   enabled: false
+  #   report_script: "scripts/instagram_report.py"
+  #   metrics:
+  #     primary: [reach, likes, comments, saves, shares]
+  #     derived: []
+  #   competitive:
+  #     enabled: false
+  #     collection_frequency: "monthly"
+  #     accounts: []
+  #   trend_watch:
+  #     enabled: false
+
+  # threads:
+  #   name: "Threads"
+  #   short_name: "Threads"
+  #   enabled: false
+  #   report_script: "scripts/threads_report.py"
+  #   metrics:
+  #     primary: [views, likes, replies, reposts]
+  #     derived: []
+  #   competitive:
+  #     enabled: false
+  #     collection_frequency: "monthly"
+  #     accounts: []
+  #   trend_watch:
+  #     enabled: false
+
+# --- ダッシュボード設定 ---
+dashboard:
+  output_dir: "knowledge/logs/dashboard"  # 統合ダッシュボードの出力先
+  theme: "dark"
+  chart_cdn: "https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+  # タブ構成: [統合] [X] [note] [Instagram] ...
+  # 統合タブ: Summary / Competitive / Trend Watch / Algorithm / System
+  # 各PFタブ: Post Analysis（PF固有の指標・分析軸）
+  integrated_sections:         # 統合タブのセクション
+    - id: summary
+      name: "Summary"
+      enabled: true
+    - id: competitive
+      name: "Competitive"
+      enabled: true
+    - id: trend_watch
+      name: "Trend Watch"
+      enabled: true
+    - id: algorithm
+      name: "Algorithm"
+      enabled: true
+    - id: system
+      name: "System"
+      enabled: true
+  platform_sections:           # 各PFタブのセクション
+    - id: post_analysis
+      name: "Post Analysis"
+      enabled: true
+
+# --- アルゴリズム監視設定 ---
+algorithm_monitor:
+  baseline_window_weeks: 12
+  anomaly_threshold_sigma: 2.0

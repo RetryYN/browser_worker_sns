@@ -1,0 +1,157 @@
+# X 個別ポストレポート取得タスク
+# /run-task x-post-report post_id: 2026-03-10_月 post_url: https://x.com/.../status/...
+
+name: x-post-report
+description: Xの単一ポストから指標を取得し、個別レポートYAMLを保存する
+
+site: x
+
+params:
+  - name: post_id
+    description: "レポート保存用ID（例: 2026-03-10_月）"
+    required: true
+    example: "2026-03-10_月"
+  - name: post_url
+    description: "対象ポストのURL"
+    required: true
+    example: "https://x.com/example/status/1234567890"
+  - name: date
+    description: "投稿日（YYYY-MM-DD）"
+    required: true
+    example: "2026-03-10"
+  - name: day
+    description: "投稿曜日（例: 月, 水, 金）"
+    required: true
+    example: "月"
+  - name: time
+    description: "投稿時刻（HH:mm）"
+    required: true
+    example: "20:00"
+  - name: pattern
+    description: "posting-strategy.md の投稿パターンID"
+    required: true
+    example: "xgrid-4koma"
+  - name: topic
+    description: "投稿テーマ"
+    required: true
+    example: "Claude Codeで1週間開発してみた"
+  - name: characters
+    description: "登場キャラ名。カンマ区切り"
+    required: false
+    example: "アイコ, ChatGPT, Claude, Gemini"
+  - name: notes
+    description: "定性メモ。なければ空でよい"
+    required: false
+    example: "リプが想定より多く、画像4枚目のオチが刺さっていた"
+
+steps:
+  - action: navigate
+    description: "対象ポストにアクセスする"
+    url: "{{post_url}}"
+
+  - action: login
+    description: "ログイン状態を確認し、未ログインならログインする"
+    site: "{{site}}"
+
+  - action: interact
+    description: |
+      対象ポストの詳細画面を開いた状態で、本文・画像・各種カウンタが見える表示まで整える。
+      無料プラン前提なので X アナリティクス画面は使わず、個別投稿画面から読める指標だけを使う。
+
+  - action: verify
+    description: "個別投稿画面と可視カウンタが表示されていることを確認し、スクリーンショットを撮る"
+
+  - action: interact
+    description: |
+      個別投稿画面から読める数値だけを読み取り、以下のフォーマットで step_results に記録する。
+      impressions は views 表示があればその値を使う。bookmarks が見えない場合は 0 を入れる。
+
+      impressions: <数値>
+      likes: <数値>
+      replies: <数値>
+      retweets: <数値>
+      bookmarks: <数値>
+
+  - action: generate_text
+    description: "取得した指標を個別ポストレポートYAMLへ整形する"
+    instruction: |
+      以下の指標ブロックをもとに、X個別ポストレポートの YAML を出力する。
+      指標ブロック:
+      {{prev_result}}
+
+      メタデータ:
+      - post_id: {{post_id}}
+      - date: {{date}}
+      - day: {{day}}
+      - time: {{time}}
+      - pattern: {{pattern}}
+      - topic: {{topic}}
+      - characters: {{characters}}
+      - notes: {{notes}}
+
+      pattern から pattern_rank / difficulty を以下で決める:
+      - dotchi-taiketsu -> S / 初心者
+      - sankagata-odai -> S / 初心者
+      - quiz-senshuken -> S / 初心者
+      - xgrid-4koma -> A / 初心者
+      - prompt-ba -> A / 中級
+      - tsukaiwake-chart -> A / 中級
+      - aruaru-kakeai -> B / 初心者
+      - dokuzetu-review -> B / 中級
+      - gachi-thread -> C / 上級
+      - trend-sokuhou -> C / 中級
+
+      engagements は likes + replies + retweets + bookmarks の合計で計算する。
+      engagement_rate は impressions が 0 より大きい場合のみ `engagements / impressions * 100` で計算し、小数第2位まで丸める。
+      profile_clicks と link_clicks は無料プランで取得しないため 0 を入れる。
+
+      出力要件:
+      - YAML のみを返す
+      - characters はカンマ区切り文字列を YAML 配列へ変換する。空なら [] にする
+      - metrics の数値は数値型で出力する
+      - scores は 0 の初期値を入れる
+      - notes が空なら空文字を入れる
+
+      出力フォーマット:
+      post_id: "{{post_id}}"
+      date: {{date}}
+      day: "{{day}}"
+      time: "{{time}}"
+      pattern: "{{pattern}}"
+      pattern_rank: "A"
+      difficulty: "中級"
+      topic: "{{topic}}"
+      characters: []
+      metrics:
+        impressions: 0
+        engagements: 0
+        engagement_rate: 0.0
+        likes: 0
+        replies: 0
+        retweets: 0
+        bookmarks: 0
+        profile_clicks: 0
+        link_clicks: 0
+      scores:
+        volume_score: 0.0
+        quality_score: 0.0
+        composite_score: 0.0
+      notes: ""
+
+  - action: command
+    description: "生成した個別レポートYAMLを knowledge/logs/x/posts に保存する"
+    command: |
+      $path = "knowledge/logs/x/posts/{{post_id}}.yaml"
+      $dir = Split-Path -Parent $path
+      if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+      @"
+      {{prev_result}}
+      "@ | Set-Content -Encoding UTF8 $path
+      Write-Output $path
+
+  - action: command
+    description: "保存した個別レポートに対して score コマンドを実行し、YAML と指標の整合を確認する"
+    command: |
+      python scripts/x_report.py score "knowledge/logs/x/posts/{{post_id}}.yaml"
+
+on_error: "スクリーンショットを撮って状況を報告する"

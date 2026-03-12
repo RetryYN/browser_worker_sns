@@ -1,0 +1,42 @@
+# X 個別レポート
+post_id: "YYYY-MM-DD_曜"
+date: YYYY-MM-DD
+day: "月"
+time: "20:00"
+status: "posted"              # posted / scheduled / draft
+
+# --- コンテンツ情報 ---
+pattern: "xgrid-4koma"        # posting-strategy.md のパターンID
+pattern_rank: "A"             # S / A / B / C
+difficulty: "初心者"           # 初心者 / 中級 / 上級
+pillar: "やってみた実演"       # やってみた実演 / 埋もれた一次情報のフォーク / 制作の裏側公開
+topic: ""
+post_text: ""                 # 投稿本文（140字以内）
+post_url: ""                  # 投稿URL（posted 後に埋める）
+characters: []
+
+# --- 画像情報 ---
+image: ""                     # 画像ファイルパス
+image_type: "diagram"         # thumbnail / diagram / comic / x-grid / quiz-* 等
+image_layout: "default"       # default / board
+image_issues: ""              # 画像の品質問題（キャラ被り等）。なければ空
+
+# --- 指標（x-post-report で埋める） ---
+metrics:
+  impressions: 0
+  engagements: 0              # likes + replies + retweets + bookmarks
+  engagement_rate: 0.0        # engagements / impressions * 100
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0                # 見えない場合は 0
+  profile_clicks: 0           # free運用では取得しない
+  link_clicks: 0              # free運用では取得しない
+
+# --- スコア（x_report.py で算出） ---
+scores:
+  volume_score: 0.0           # replies*10 + bookmarks*8 + retweets*3 + likes*1
+  quality_score: 0.0          # engagement_rate そのまま
+  composite_score: 0.0        # 正規化後 0.6*volume + 0.4*quality
+
+notes: ""                     # 定性メモ（バズった理由、失敗要因等）

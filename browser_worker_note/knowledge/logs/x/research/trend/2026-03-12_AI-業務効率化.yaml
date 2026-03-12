@@ -1,0 +1,37 @@
+type: trend
+keyword: AI 業務効率化
+period:
+  from: '2026-03-05'
+  to: '2026-03-12'
+analyzed_at: '2026-03-12T14:34:02.472472'
+summary: "1. 盛り上がっているトピック（3-5個、それぞれ簡潔に説明）  \n   - 最強AIツールの使い分け：Gemini（業務効率化）、Perplexity（情報収集）、NanoBanana\
+  \ Pro（画像生成）など、用途別ツールリストが人気。[[1]](https://x.com/i/status/2027987196125581461)[[2]](https://x.com/i/status/2027208680907956528)\
+  \  \n   - NotebookLM×GASの自動化：Googleフォーム作成やGmail送信を日本語指示で全自動化する手法が話題。[[3]](https://x.com/i/status/2031840770450395231)[[4]](https://x.com/i/status/2031837660013064482)\
+  \  \n   - Microsoft 365 CopilotのClaude対応：PC操作（メール仕分け、Excel抽出）をチャット指示で代行。[[5]](https://x.com/i/status/2031261332868313427)\
+  \  \n   - Claude活用の業務改善：記事共有や契約レビューなどの実務事例が拡散。[[6]](https://x.com/i/status/2030150737548956101)\
+  \  \n   - AIエージェントの完全自動化：OpenClawで営業〜納品まで自動化する海外事例。[[7]](https://x.com/i/status/2026056473982242900)\n\
+  \n2. よく使われているフォーマット・切り口  \n   箇点リスト形式のツール比較表、動画デモ（NotebookLM操作）、無料プロンプト集/セミナー募集、引用RTで詳細スレッド展開、Before/After事例紹介。実践即適用可能な「コピペOK」スタイルが主流。[[1]](https://x.com/i/status/2027987196125581461)[[4]](https://x.com/i/status/2031837660013064482)\n\
+  \n3. エンゲージメントが高い投稿の共通点  \n   具体的なツール名・プロンプト例のリスト形式、画像/動画付きデモ、無料プレゼント（note記事、セミナー特典）、Likes/RT誘導のCTA（「いいねで保存」「フォローで受け取り」）。Likes\
+  \ 100超のものは視覚的にわかりやすく、即実践可能な内容。[[1]](https://x.com/i/status/2027987196125581461)[[8]](https://x.com/i/status/2029792962918633573)[[9]](https://x.com/i/status/2030221968000397370)\n\
+  \n4. 注目すべき投稿（URL付きで最大5件）  \n   - https://x.com/Oc4Um/status/2027987196125581461（ツールリスト、Likes=186）[[1]](https://x.com/i/status/2027987196125581461)\
+  \  \n   - https://x.com/arupoki/status/2029792962918633573（Claude記事、Likes=2139）[[8]](https://x.com/i/status/2029792962918633573)\
+  \  \n   - https://x.com/ai_jitan/status/2031837660013064482（NotebookLM×GAS動画、Likes=556）[[4]](https://x.com/i/status/2031837660013064482)\
+  \  \n   - https://x.com/yuxtukuri12092/status/2027208680907956528（ツールリスト、Likes=195）[[2]](https://x.com/i/status/2027208680907956528)\
+  \  \n   - https://x.com/osarupolice/status/2031261332868313427（Copilot活用例）[[5]](https://x.com/i/status/2031261332868313427)\n\
+  \n5. コンテンツのネタになりそうなアイデア（3個、具体的に）  \n   - 「2026年業務効率化AIツール完全比較表」：Gemini/Copilot/Perplexityの強み・弱みを表形式でまとめ、無料ダウンロードPDF配布。\
+  \  \n   - 「NotebookLM×GASでGoogle Workspace全自動化チュートリアル動画」：フォーム作成→Gmail送信のステップバイステップ、プロンプト公開で視聴者再現率向上。\
+  \  \n   - 「AIエージェントで1日業務を丸投げシミュレーション」：朝のタスク管理から議事録要約までOpenClaw風フロー再現、個人/企業向けカスタムテンプレ提供。"
+citations:
+- https://x.com/i/status/2027987196125581461
+- https://x.com/i/status/2027208680907956528
+- https://x.com/i/status/2031840770450395231
+- https://x.com/i/status/2031837660013064482
+- https://x.com/i/status/2031261332868313427
+- https://x.com/i/status/2030150737548956101
+- https://x.com/i/status/2026056473982242900
+- https://x.com/i/status/2029792962918633573
+- https://x.com/i/status/2030221968000397370
+ideas_extracted:
+- 「2026年業務効率化AIツール完全比較表」：Gemini/Copilot/Perplexityの強み・弱みを表形式でまとめ、無料ダウンロードPDF配布。
+- 「NotebookLM×GASでGoogle Workspace全自動化チュートリアル動画」：フォーム作成→Gmail送信のステップバイステップ、プロンプト公開で視聴者再現率向上。
+- 「AIエージェントで1日業務を丸投げシミュレーション」：朝のタスク管理から議事録要約までOpenClaw風フロー再現、個人/企業向けカスタムテンプレ提供。

@@ -1,0 +1,49 @@
+# X 個別レポート
+post_id: "2026-03-16_月"
+date: 2026-03-16
+day: "月"
+time: "20:00"
+status: "scheduled"
+
+pattern: "sankagata-odai"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "AIで一番「これは助かった」って場面、なに？"
+post_text: |
+  AIで一番「これは助かった」って場面、なに？
+
+  自分は議事録の要約。
+  1時間の会議が3行になった時、もう戻れないと思った。
+
+  地味なやつほど聞きたい。リプで教えて！
+
+  #AI活用
+post_url: ""
+characters: [aiko, chatgpt, claude, gemini, grok]
+
+# --- 画像情報 ---
+image: "knowledge/data/images/note_diagram_ai活用お題_2026-03-12.jpg"
+image_type: "diagram"
+image_layout: "default"
+image_issues: "キャラ被り発生（generate_image.py修正前の画像）"
+
+# --- 指標（x-post-report で埋める） ---
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+# --- スコア（x_report.py で算出） ---
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "予約投稿（セッション8）。月曜夜S級リプ誘発。参加型お題で「地味なやつほど聞きたい」がリプ誘導フック。画像は修正前のためキャラ被りあり"
