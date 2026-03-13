@@ -26,6 +26,10 @@ params:
     description: 事実メモ、比較軸、留保したい点
     required: false
     example: "新機能の範囲は限定的。断定は避ける"
+  - name: info_vectors
+    description: "5軸ベクトル分類（YAML文字列）。リサーチhandoffから引き継ぐ"
+    required: false
+    example: "semantic: AIツールの裏モデルは選択の時代 / awareness: 低"
   - name: image_type
     description: "生成する画像タイプ。不要なら none または空。単発投稿向けに thumbnail / diagram / quiz-* を想定"
     required: false
@@ -57,6 +61,7 @@ params:
 
 steps:
   - action: generate_text
+    id: gen_text
     description: "{{theme}} をもとに X 向け単発ポスト本文を生成する"
     instruction: |
       以下の情報をもとに、X の単発ポスト本文を 1 本だけ作成する。
@@ -81,6 +86,7 @@ steps:
     skill: god-writing
 
   - action: committee_review
+    id: review
     description: "生成したX投稿本文を短文運用の観点で監査する"
     target_text: "{{prev_result}}"
     skill: god-writing
@@ -94,6 +100,7 @@ steps:
       executor: CEO
 
   - action: generate_image
+    id: gen_image
     when: "{{image_type}}"
     description: "{{theme}} に合わせたX投稿用画像を必要な場合のみ生成する"
     type: "{{image_type}}"
@@ -116,13 +123,13 @@ steps:
   - action: interact
     description: |
       投稿フォームまたは投稿モーダルを開く。
-      `{{step_results[1]}}` の中から POST: の本文だけを読み取り、投稿本文欄に入力する。
+      `{{step_results.review}}` の中から POST: の本文だけを読み取り、投稿本文欄に入力する。
       {{schedule_at}} が指定されている場合は予約投稿UIも開ける状態まで進める。
 
   - action: upload_image
     when: "{{image_type}}"
     description: "生成済み画像がある場合のみ、そのファイルをそのまま添付する"
-    file_path: "{{step_results[2]}}"
+    file_path: "{{step_results.gen_image}}"
 
   - action: verify
     description: "投稿本文・添付画像・投稿ボタンの状態を確認してスクリーンショットを撮る"

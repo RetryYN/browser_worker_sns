@@ -122,11 +122,27 @@ python scripts/generate_image.py crop knowledge/data/images/source.jpg --preset 
 
 ```
 /generate-content <テーマ or ハンドオフ> [媒体: note|x] [C×P×T指定]
+/generate-content --resume <draft_path>              ← 既存下書きから再開
+/generate-content --resume <draft_path> --phase 2.5  ← 指定フェーズから再開
 ```
 
 例:
 - `/generate-content "ChatGPT for Excel" 媒体: note C3×P4`
 - `/generate-content handoff: knowledge/logs/research/2026-03-12.md#candidate-1`
+- `/generate-content --resume knowledge/drafts/note_chatgpt-history.md`
+- `/generate-content --resume knowledge/drafts/note_chatgpt-history.md --phase 3`
+
+### --resume モード
+
+既存の下書きファイルから途中再開する。下書きのステータスから開始 Phase を自動判定する。
+
+| 下書きステータス | 自動開始 Phase | やること |
+|----------------|---------------|---------|
+| 下書き | Phase 2.5 | 検証から |
+| 検証済み | Phase 3 | 校正から |
+| 校正済み | Phase 4 | 投稿へ |
+
+`--phase` で明示指定すると自動判定を上書きする。Phase 1 を指定するとアウトラインから作り直す（下書きは上書きされる）。
 
 ---
 

@@ -5,6 +5,7 @@ name: x-post-publish
 description: Xに単発ポストを作成して投稿または予約投稿する
 
 site: x
+tier: 0  # テキスト・画像準備済みの直接投稿。B/C/D/J スキップ
 
 params:
   - name: post_text

@@ -39,6 +39,14 @@ params:
     description: リサーチで整理した要点メモ
     required: false
     example: "新機能の核心、読者価値、実演可否、注意点"
+  - name: treatment
+    description: "T軸の加工方法（例: 対比（常識仮説 vs 事実のギャップ））。リサーチhandoffから引き継ぐ"
+    required: false
+    example: "対比（常識仮説 vs 事実のギャップ）"
+  - name: info_vectors
+    description: "5軸ベクトル分類（YAML文字列）。リサーチhandoffから引き継ぐ"
+    required: false
+    example: "semantic: AIツールの裏モデルは選択の時代 / awareness: 低 / discovery: OpenAIからAnthropicに切替"
   - name: verification_log
     description: 検証ログのパス
     required: false
@@ -75,6 +83,7 @@ steps:
   #   → フォールバックとして従来の generate_text → committee_review を実行する
   #
   - action: load_draft
+    id: draft
     description: |
       {{draft_path}} が指定されている場合:
       1. 下書きファイルを Read で読み込む
@@ -85,6 +94,7 @@ steps:
     when: "{{draft_path}}"
 
   - action: generate_text
+    id: gen_text
     description: "（フォールバック）{{theme}} をテーマに、note向けの長文記事ドラフトを生成する"
     when_not: "{{draft_path}}"
     instruction: |
@@ -125,6 +135,7 @@ steps:
 
   # 組織的監査（フォールバック時のみ）
   - action: committee_review
+    id: review
     description: "生成した記事を組織的視点で段階的に監査する"
     when_not: "{{draft_path}}"
     target_text: "{{prev_result}}"

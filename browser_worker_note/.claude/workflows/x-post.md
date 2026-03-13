@@ -34,9 +34,17 @@ description: X投稿をテーマ指定またはおまかせで一気通貫実行
                           /improve → 改善抽出
 ```
 
-- **`/x-post`**: 日常の投稿コマンド。実証済みフローで軽量実行
-- **`/run-task x-idea-post-publish`**: A-K 11ステップの正式フロー。初回探索やログ差分比較が必要な場合のみ
-- **`/run-task x-post-publish`**: テキスト・画像が準備済みの場合の直接投稿
+### どれを使う？
+
+```
+テーマだけある → /x-post（推奨。テーマ決定〜投稿を一気通貫）
+テキスト＋画像が準備済み → /run-task x-post-publish（tier 0、直接投稿）
+初回サイト探索・A-K全ステップが必要 → /run-task x-idea-post-publish（正式フロー）
+```
+
+- **`/x-post`**: 日常の投稿コマンド。テーマ決定・本文生成・画像生成・投稿・記録を一気に実行。A-K ステップは使わない
+- **`/run-task x-idea-post-publish`**: Delvework A-K 正式フロー。サイト構造が変わった時やログ差分が必要な場合のみ
+- **`/run-task x-post-publish`**: テキスト・画像が準備済みの直接投稿（tier 0: B/C/D/J スキップ）
 
 ---
 
