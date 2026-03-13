@@ -1,0 +1,10 @@
+# 作業用スクリーンショット（ルート直下）
+/*.png
+/*.jpg
+/*.jpeg
+
+# MCP設定（ローカル固有）
+.mcp.json
+
+# Playwright MCP logs
+.playwright-mcp/

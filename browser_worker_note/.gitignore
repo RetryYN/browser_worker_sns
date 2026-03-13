@@ -23,3 +23,12 @@ Thumbs.db
 
 # Playwright MCP logs
 .playwright-mcp/
+
+# MCP設定（ローカル固有）
+.mcp.json
+
+# 作業用スクリーンショット（ルート直下に散らかるもの）
+# クリエイティブ画像は knowledge/data/images/ で管理
+/*.png
+/*.jpg
+/*.jpeg
