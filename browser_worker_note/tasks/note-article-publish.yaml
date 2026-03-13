@@ -113,31 +113,102 @@ steps:
         - role: Writer
       executor: CEO
 
-  # エディタに入力
-  - action: interact
-    description: |
-      直前ステップの最終稿から TITLE / LEAD / BODY / CTA / TAGS を読み取り、以下の操作を行う:
-      1. タイトル欄に TITLE を入力する
-      2. 本文エリアには LEAD → BODY → CTA の順で入力する
-      3. タグ欄には、{{tags}} が指定されていればそれを優先し、未指定なら TAGS を入力する
-
   # サムネイル画像アップロード（任意）
-  - action: upload_image
-    description: "{{thumbnail_path}} が指定されている場合のみサムネイル画像をアップロードする"
-    file_path: "{{thumbnail_path}}"
-
-  # 公開前確認
-  - action: verify
-    description: "プレビューで記事の見た目を確認してスクリーンショットを撮る"
-
-  # 公開
   - action: interact
     description: |
-      公開確認ダイアログを開き、公開範囲と最終表示を確認したうえで記事を公開する。
-      公開直前にはユーザー最終承認を取り、承認後にのみ「公開する」を押す。
+      {{thumbnail_path}} が指定されている場合のみ:
+      1. 「画像を追加」ボタンをクリック
+      2. ファイルチューザーが開く → browser_file_upload で {{thumbnail_path}} を指定
+    when: "{{thumbnail_path}}"
+
+  # タイトル入力
+  - action: interact
+    description: |
+      直前の generate_text/committee_review 最終稿から TITLE を読み取り:
+      1. 「記事タイトル」テキストボックスをクリック
+      2. browser_type でタイトルを入力
+
+  # 本文入力
+  - action: interact
+    description: |
+      最終稿から LEAD / BODY / CTA を読み取り、browser_evaluate でDOM一括操作:
+      1. ProseMirror エディタを取得: document.querySelector('.ProseMirror')
+      2. 見出し（h2/h3）、段落(p)、リスト(ul/ol)をHTML文字列で構築
+      3. エディタのinnerHTMLに挿入
+      4. dispatchEvent(new Event('input', { bubbles: true })) で変更を通知
+      ※ browser_type の繰り返しよりDOM一括操作が効率的
+
+  # 画像挿入（記事内の図解・スクリーンショット等）
+  - action: interact
+    description: |
+      記事内に挿入する画像がある場合:
+      1. 挿入位置の空段落をクリック
+      2. 「メニューを開く」(+ボタン)をクリック
+      3. 「画像」をクリック
+      4. ファイルチューザーが開く → browser_file_upload で絶対パスを指定
+      ※ 複数画像は挿入位置ごとに繰り返す
+
+  # テキスト装飾（太字等）
+  - action: interact
+    description: |
+      browser_evaluate でProseMirrorのDOM操作:
+      1. 太字対象テキストをリストアップ
+      2. innerHTML.replace で <strong> タグを追加
+      3. dispatchEvent(new Event('input', { bubbles: true }))
+
+  # 目次挿入
+  - action: interact
+    description: |
+      見出し確定後に目次を挿入:
+      1. リード直後の空段落をクリック
+      2. 「メニューを開く」→「目次」をクリック
+      ※ H2/H3から自動生成される
+
+  # 公開設定に進む
+  - action: interact
+    description: |
+      「公開に進む」ボタンをクリック → editor.note.com/notes/<id>/publish/ に遷移
+
+  # ハッシュタグ設定
+  - action: interact
+    description: |
+      combobox「ハッシュタグを追加する」に以下の手順で追加:
+      1. combobox に slowly: true でタグ名を入力（#なし）
+      2. ドロップダウンから候補をクリック
+      3. 次のタグも同様に繰り返す
+      {{tags}} が指定されていればそれを使い、未指定なら TAGS を入力する
+
+  # 記事タイプ・マガジン・詳細設定確認
+  - action: verify
+    description: |
+      公開設定画面で以下を確認・スクリーンショット:
+      - 記事タイプ: 無料（デフォルト）
+      - マガジン追加状態
+      - クリエイターページに表示: ON
+      - AI学習対価還元: ON
+      - コメント受付: ON
+
+  # 公開（ユーザー最終承認）
+  - action: interact
+    description: |
+      ユーザーに公開設定のサマリーを提示し、最終承認を取る。
+      承認後に「投稿する」ボタンをクリック。
+
+  # スキ設定（投稿直後に遷移）
+  - action: interact
+    description: |
+      スキ設定画面（/like_reaction_setting）に自動遷移する。
+      スキ画像を設定する場合:
+      1. 「画像をアップロード」の親要素をクリック
+      2. ファイルチューザー → browser_file_upload
+      3. 「これで設定！」をクリック
+      設定しない場合は「スキップ」をクリック。
 
   # 公開後確認
   - action: verify
-    description: "公開完了画面または公開URLを確認し、公開後の見た目をスクリーンショットで記録する"
+    description: |
+      公開された記事ページ（https://note.com/akatu_unison/n/<記事ID>）にアクセスし:
+      1. snapshot で記事構成を確認（タイトル、見出し、画像、ハッシュタグ）
+      2. スクリーンショットを撮る
 
 on_error: "スクリーンショットを撮って状況を報告する"

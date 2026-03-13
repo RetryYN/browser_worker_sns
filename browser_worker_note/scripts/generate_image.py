@@ -982,21 +982,81 @@ def generate(image_type: str, prompt: str, topic: str | None = None,
 
     img = img.convert("RGB")  # PNG → RGB（JPG用）
 
-    # サムネイルは note 推奨比率 1.91:1 にクロップ → 1280×670 にリサイズ
+    # サムネイルは note 推奨比率にクロップ（CROP_PRESETS 経由で統一）
     if image_type == "thumbnail":
-        w, h = img.size  # 1536×1024
-        target_ratio = 1280 / 670  # ≈ 1.91
-        new_h = int(w / target_ratio)  # ≈ 804
+        tw, th = CROP_PRESETS["note-thumbnail"]
+        w, h = img.size
+        target_ratio = tw / th
+        new_h = int(w / target_ratio)
         if new_h < h:
             crop_top = (h - new_h) // 2
-            crop_bottom = crop_top + new_h
-            img = img.crop((0, crop_top, w, crop_bottom))
-            img = img.resize((1280, 670), Image.LANCZOS)
-            print(f"[generate] cropped to note ratio: {w}×{h} → 1280×670")
+            img = img.crop((0, crop_top, w, crop_top + new_h))
+            img = img.resize((tw, th), Image.LANCZOS)
+            print(f"[generate] cropped to note ratio: {w}×{h} → {tw}×{th}")
 
     img.save(output_path, "JPEG", quality=90)
     print(f"[generate] saved: {output_path}")
     return output_path
+
+
+## ── マルチクロップ ──────────────────────────────────────────
+
+# プリセット: name → (width, height)
+CROP_PRESETS = {
+    "note-thumbnail": (1280, 670),
+    "note-header":    (1280, 420),
+    "x-header":       (1500, 500),
+}
+
+
+def crop_image(src: Path, preset: str) -> Path:
+    """既存画像を指定プリセットにセンタークロップ+リサイズして保存する。"""
+    if preset not in CROP_PRESETS:
+        raise ValueError(f"Unknown preset: {preset}. Available: {list(CROP_PRESETS.keys())}")
+
+    tw, th = CROP_PRESETS[preset]
+    target_ratio = tw / th
+
+    img = Image.open(src).convert("RGB")
+    w, h = img.size
+
+    # アスペクト比に合わせてセンタークロップ
+    current_ratio = w / h
+    if current_ratio > target_ratio:
+        # 横が広すぎる → 左右をクロップ
+        new_w = int(h * target_ratio)
+        crop_left = (w - new_w) // 2
+        img = img.crop((crop_left, 0, crop_left + new_w, h))
+    else:
+        # 縦が長すぎる → 上下をクロップ
+        new_h = int(w / target_ratio)
+        crop_top = (h - new_h) // 2
+        img = img.crop((0, crop_top, w, crop_top + new_h))
+
+    img = img.resize((tw, th), Image.LANCZOS)
+
+    # 出力ファイル名: 元ファイル名の prefix を差し替え
+    platform = preset.split("-")[0]  # "note" or "x"
+    purpose = preset.split("-", 1)[1]  # "thumbnail", "header"
+    stem = src.stem  # e.g. "note_thumbnail_topic_2026-03-12"
+    # topic部分を抽出（3番目以降、日付部分を除く）
+    parts = stem.split("_")
+    date_part = parts[-1] if re.match(r"\d{4}-\d{2}-\d{2}", parts[-1]) else ""
+    topic_parts = parts[2:-1] if len(parts) > 3 else parts[2:]
+    topic_slug = "_".join(topic_parts) if topic_parts else "cropped"
+
+    out_name = f"{platform}_{purpose}_{topic_slug}_{date_part}.jpg" if date_part else f"{platform}_{purpose}_{topic_slug}.jpg"
+    out_path = src.parent / out_name
+
+    img.save(out_path, "JPEG", quality=90)
+    print(f"[crop] {preset}: {w}×{h} → {tw}×{th} → {out_path}")
+    return out_path
+
+
+def crop_all(src: Path, presets: list[str] | None = None) -> list[Path]:
+    """複数プリセットを一括適用する。presets=None なら全プリセットを適用。"""
+    targets = presets or list(CROP_PRESETS.keys())
+    return [crop_image(src, p) for p in targets]
 
 
 def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[Path]:
@@ -1037,49 +1097,107 @@ def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[P
 
 
 def main():
+    parser = argparse.ArgumentParser(description="画像生成・クロップ")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # --- crop サブコマンド ---
+    crop_parser = subparsers.add_parser("crop", help="既存画像をプリセットサイズにクロップ")
+    crop_parser.add_argument("source", help="クロップ元の画像パス")
+    crop_parser.add_argument("--preset",
+                             choices=list(CROP_PRESETS.keys()) + ["all"],
+                             default="all",
+                             help="クロッププリセット（デフォルト: all）")
+
+    # --- generate サブコマンド（従来の動作） ---
     all_types = ["thumbnail", "diagram", "comic", "x-grid",
                  "quiz-choice", "quiz-ox", "quiz-fill", "quiz-ranking",
                  "quiz-spot", "quiz-open", "quiz-number", "quiz-ba"]
-    parser = argparse.ArgumentParser(description="画像生成（サムネイル / 図解 / 4コマ漫画 / Xグリッド / クイズ）")
-    parser.add_argument("type", choices=all_types, help="画像タイプ")
-    parser.add_argument("prompt", help="生成プロンプト（日本語OK）")
-    parser.add_argument("--topic", help="トピック名（ファイル名用、例: ai-agent）")
-    parser.add_argument("--style", choices=list(THUMBNAIL_STYLES.keys()),
-                        help="サムネイルスタイル（thumbnail タイプ専用）")
-    parser.add_argument("--chars",
-                        help="リファレンスキャラ指定（カンマ区切り、例: aiko,chatgpt）")
-    parser.add_argument("--story", help="ストーリー指定（形式: '1:ラベル|説明 2:ラベル|説明 3:ラベル|説明 4:ラベル|説明'）")
-    parser.add_argument("--layout", choices=["board"], help="図解レイアウト（board: 黒板/ホワイトボード上に描画）")
-    parser.add_argument("--quiz-data", help="クイズデータ（選択式: 'Q:問題|A:選択肢A|B:選択肢B|C:選択肢C|D:選択肢D'、ランキング: '1:項目|2:項目|3:項目|?:隠し'）")
-    args = parser.parse_args()
+    gen_parser = subparsers.add_parser("generate", help="画像を生成")
+    gen_parser.add_argument("type", choices=all_types, help="画像タイプ")
+    gen_parser.add_argument("prompt", help="生成プロンプト（日本語OK）")
+    gen_parser.add_argument("--topic", help="トピック名（ファイル名用、例: ai-agent）")
+    gen_parser.add_argument("--style", choices=list(THUMBNAIL_STYLES.keys()),
+                            help="サムネイルスタイル（thumbnail タイプ専用）")
+    gen_parser.add_argument("--chars",
+                            help="リファレンスキャラ指定（カンマ区切り、例: aiko,chatgpt）")
+    gen_parser.add_argument("--story", help="ストーリー指定（形式: '1:ラベル|説明 2:ラベル|説明 3:ラベル|説明 4:ラベル|説明'）")
+    gen_parser.add_argument("--layout", choices=["board"], help="図解レイアウト（board: 黒板/ホワイトボード上に描画）")
+    gen_parser.add_argument("--quiz-data", help="クイズデータ")
+    gen_parser.add_argument("--crop",
+                            choices=list(CROP_PRESETS.keys()) + ["all"],
+                            help="生成後に追加クロップ（ヘッダー画像等）")
 
-    if args.type == "x-grid":
-        if not args.story:
-            parser.error("x-grid requires --story")
-        outputs = generate_x_grid(args.prompt, args.story, args.topic)
-        print(f"\n完了: {len(outputs)} panels generated")
+    # --- 後方互換: サブコマンドなしで type を直接指定 ---
+    # sys.argv[1] が "crop" / "generate" でなければ旧CLI形式とみなす
+    if len(sys.argv) > 1 and sys.argv[1] not in ("crop", "generate", "-h", "--help"):
+        old_parser = argparse.ArgumentParser(description="画像生成（後方互換モード）")
+        old_parser.add_argument("type", choices=all_types)
+        old_parser.add_argument("prompt")
+        old_parser.add_argument("--topic", default=None)
+        old_parser.add_argument("--style", default=None)
+        old_parser.add_argument("--chars", default=None)
+        old_parser.add_argument("--story", default=None)
+        old_parser.add_argument("--layout", default=None)
+        old_parser.add_argument("--quiz-data", default=None)
+        old_parser.add_argument("--crop", default=None)
+        args = old_parser.parse_args()
+        args.command = "generate"
+    else:
+        args = parser.parse_args()
+
+    if args.command == "crop":
+        src = Path(args.source)
+        if not src.exists():
+            print(f"[error] file not found: {src}")
+            sys.exit(1)
+        if args.preset == "all":
+            outputs = crop_all(src)
+        else:
+            outputs = [crop_image(src, args.preset)]
+        print(f"\n完了: {len(outputs)} file(s)")
         for p in outputs:
             print(f"  {p}")
         return
 
-    # プロンプト組み立て
-    prompt = args.prompt
+    if args.command == "generate":
+        if args.type == "x-grid":
+            if not args.story:
+                print("[error] x-grid requires --story")
+                sys.exit(1)
+            outputs = generate_x_grid(args.prompt, args.story, args.topic)
+            print(f"\n完了: {len(outputs)} panels generated")
+            for p in outputs:
+                print(f"  {p}")
+            return
 
-    # 4コマ漫画の場合、--story をプロンプトに統合
-    if args.type == "comic" and args.story:
-        prompt += f"\n\n## Panel Story\n{args.story}"
+        # プロンプト組み立て
+        prompt = args.prompt
 
-    # 図解のボードレイアウト
-    if args.type == "diagram" and args.layout == "board":
-        prompt += f"\n\n{LAYOUT_BOARD}"
+        if args.type == "comic" and args.story:
+            prompt += f"\n\n## Panel Story\n{args.story}"
 
-    # クイズタイプの場合、--quiz-data をプロンプトに統合
-    if args.type.startswith("quiz-") and args.quiz_data:
-        prompt += f"\n\n## Quiz Data\n{args.quiz_data}"
+        if args.type == "diagram" and args.layout == "board":
+            prompt += f"\n\n{LAYOUT_BOARD}"
 
-    char_list = args.chars.split(",") if args.chars else None
-    output = generate(args.type, prompt, args.topic, style=args.style, chars=char_list)
-    print(f"\n完了: {output}")
+        if args.type.startswith("quiz-") and getattr(args, "quiz_data", None):
+            prompt += f"\n\n## Quiz Data\n{args.quiz_data}"
+
+        char_list = args.chars.split(",") if args.chars else None
+        output = generate(args.type, prompt, args.topic, style=args.style, chars=char_list)
+        print(f"\n完了: {output}")
+
+        # --crop 後処理
+        if getattr(args, "crop", None):
+            print(f"\n[post-process] cropping to {args.crop}...")
+            if args.crop == "all":
+                extras = crop_all(output)
+            else:
+                extras = [crop_image(output, args.crop)]
+            for p in extras:
+                print(f"  {p}")
+        return
+
+    parser.print_help()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,133 @@
+# プロフィール同期タスク
+# note と X のプロフィール（名前・自己紹介・画像）を一括更新する
+
+name: profile-sync
+description: |
+  note と X のプロフィールを同期する。
+  名前・自己紹介・ヘッダー画像・プロフィール画像を一括で更新する。
+  文字数制限は config/platforms.yaml の char_limits を参照。
+
+# 複数サイトにまたがるため site は指定しない
+site: null
+
+params:
+  - name: name
+    description: アカウント名（X: 50文字以内）
+    required: true
+    example: "「チームAアイドル」アイディアに時間を、タスクはAIへ"
+
+  - name: x_bio
+    description: X の自己紹介文（160文字以内）
+    required: true
+    example: "アイドルタイムを潰すAI5人組。note.com/akatu_unison"
+
+  - name: note_bio
+    description: note の自己紹介文（140文字以内）
+    required: true
+    example: "アイドルタイムを潰すAI5人組。※AI運営アカウント"
+
+  - name: header_image_base
+    description: ヘッダー画像のベース（1536×1024）。crop で各サイズに切り出す
+    required: false
+    example: "knowledge/data/images/note_thumbnail_team-a-idol_2026-03-12.jpg"
+
+  - name: icon_image
+    description: プロフィール画像のパス
+    required: false
+    example: "knowledge/characters/aiko/ref_idol.jpg"
+
+steps:
+  # ── 前処理: 文字数チェック ──
+  - action: command
+    description: |
+      文字数プリフライトチェック:
+      - name: X 50文字以内か
+      - x_bio: X 160文字以内か
+      - note_bio: note 140文字以内か
+      超過時はエラーで中断する
+    command: |
+      python -c "
+      import sys
+      checks = [
+        ('name', '''{{name}}''', 50),
+        ('x_bio', '''{{x_bio}}''', 160),
+        ('note_bio', '''{{note_bio}}''', 140),
+      ]
+      failed = False
+      for label, text, limit in checks:
+        n = len(text)
+        status = 'OK' if n <= limit else 'NG'
+        print(f'  {label}: {n}/{limit} [{status}]')
+        if n > limit:
+          failed = True
+      if failed:
+        print('ERROR: 文字数制限超過')
+        sys.exit(1)
+      print('All checks passed.')
+      "
+
+  # ── 前処理: ヘッダー画像クロップ ──
+  - action: command
+    when: "{{header_image_base}}"
+    description: "ベース画像から note ヘッダー (1280×420) と X ヘッダー (1500×500) を切り出す"
+    command: |
+      python scripts/generate_image.py crop "{{header_image_base}}" --preset all
+
+  # ── note プロフィール更新 ──
+  - action: navigate
+    description: "note の設定ページにアクセスする"
+    url: "https://note.com/settings"
+
+  - action: login
+    description: "note にログインする（未ログイン時）"
+    site: note
+
+  - action: interact
+    description: |
+      note のプロフィール設定画面で以下を更新する:
+      1. ニックネームを「{{name}}」に変更
+      2. 自己紹介を「{{note_bio}}」に変更
+      3. ヘッダー画像を差し替え（{{header_image_base}} がある場合）
+      4. プロフィール画像を差し替え（{{icon_image}} がある場合）
+      5. 「保存」をクリック
+
+      参照: knowledge/sites/note/settings.md
+
+  # ── X プロフィール更新 ──
+  - action: navigate
+    description: "X のプロフィールページにアクセスする"
+    url: "https://x.com/UaW6wnKW8c87193"
+
+  - action: login
+    description: "X にログインする（未ログイン時）"
+    site: x
+
+  - action: interact
+    description: |
+      X のプロフィール編集モーダルで以下を更新する:
+      1. 「プロフィールを編集」をクリック → 編集モーダル表示
+      2. ヘッダー画像を差し替え（{{header_image_base}} がある場合、x_header クロップ済みファイルを使用）
+      3. プロフィール画像を差し替え（{{icon_image}} がある場合）
+      4. 名前を「{{name}}」に変更（Ctrl+A → 上書き入力）
+      5. 自己紹介を「{{x_bio}}」に変更（nativeInputValueSetter パターンを使用）
+      6. 「保存」をクリック
+
+      参照: knowledge/sites/x/index.md のプロフィール編集セクション
+      注意: 自己紹介の textarea は browser_type(slowly: true) がタイムアウトする。
+            browser_evaluate で nativeInputValueSetter + input イベントで設定すること。
+
+  # ── 検証 ──
+  - action: verify
+    description: |
+      両プラットフォームのプロフィールページで更新結果を確認する:
+      1. note のプロフィールページでスクリーンショット
+      2. X のプロフィールページでスクリーンショット
+      3. 名前・自己紹介・画像が正しく反映されているか目視確認
+
+  # ── ナレッジ更新 ──
+  - action: command
+    description: "プロフィール更新をナレッジに記録する"
+    command: |
+      echo "プロフィール同期完了。knowledge/sites/ の各 public-page 系ファイルを手動更新すること。"
+
+on_error: "スクリーンショットを撮って状況を報告する。片方だけ更新済みの場合は、完了したサイトを記録して未完了サイトのみ再実行する"

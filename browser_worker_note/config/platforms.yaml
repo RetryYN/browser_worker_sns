@@ -18,6 +18,15 @@ platforms:
     short_name: "X"
     enabled: true
     report_script: "scripts/x_report.py"
+    char_limits:
+      name: 50
+      bio: 160
+      post: 140              # プレミアムなし
+      post_premium: 25000
+    image_sizes:
+      header: [1500, 500]    # プロフィールヘッダー
+      icon: [400, 400]       # プロフィールアイコン
+      post_single: [1200, 675]  # 1枚添付時（16:9）
     api:
       provider: "xai"              # xAI API（Grok + X Search ツール）
       env_key: "XAI_API_KEY"       # .env の環境変数名
@@ -50,6 +59,14 @@ platforms:
     short_name: "note"
     enabled: true
     # report_script: "scripts/note_report.py"  # TBD: 未実装。note-dashboard-report.yaml で直接YAML生成中
+    char_limits:
+      name: 50               # 要実測確認
+      bio: 140
+      article_title: 80      # 要実測確認
+    image_sizes:
+      header: [1280, 420]    # プロフィールヘッダー（実績値）
+      icon: [400, 400]       # プロフィールアイコン
+      thumbnail: [1280, 670] # 記事サムネイル（1.91:1）
     metrics:
       primary: [page_views, visitors, likes, comments]
       derived: []                     # TBD: note用スコア設計後

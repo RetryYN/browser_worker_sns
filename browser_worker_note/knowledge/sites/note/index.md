@@ -93,6 +93,7 @@
 - [x] 公開設定画面（editor.note.com/notes/<id>/publish/）→ 詳細: [article-editor.md](article-editor.md#公開設定画面)
 - [x] クリエイターページ（/akatu_unison）→ 詳細: [public-page.md](public-page.md)
 - [x] 設定（/settings/account）→ 詳細: [settings.md](settings.md)
+- [x] スキ設定（/like_reaction_setting）→ 詳細: [article-editor.md](article-editor.md#スキ設定画面投稿直後に遷移)
 - [ ] マガジン（/magazines/all） — **優先度: 高**。トピック設計済みだが未作成。記事が5本以上溜まったら探索→作成
 - [ ] 画像ギャラリー（/creator_gallery） — **優先度: 低**。運用上の必要性が出てから探索
 
@@ -172,3 +173,6 @@
 - **エディタ離脱時**: beforeunloadダイアログが表示される。`browser_handle_dialog(accept=true)` で処理
 - **SPA遷移**: ページによっては初回ロードが遅い（3秒待機が必要な場合あり）
 - **メール認証**: 投稿・購入・コメントにはメール認証完了が必要
+- **投稿後の画面遷移**: 投稿する → スキ設定画面（/like_reaction_setting）→ noteトップ。スキ設定はスキップ可能
+- **スキ画像**: 1枚のみ設定可。記事ごとの自動切替は不可。手動差し替えで対応
+- **公開記事URL**: `https://note.com/akatu_unison/n/<記事ID>`

@@ -113,7 +113,169 @@ URL: `editor.note.com/notes/<id>/publish/`
 5. 「投稿する」をクリック → 公開
 ```
 
+## テキスト選択ツールバー
+
+テキストを選択すると表示されるフローティングツールバー。
+
+| ボタン | 機能 |
+|--------|------|
+| AIアシスタント | AI支援（未検証） |
+| 見出し | 選択テキストを見出しに変換 |
+| 太字 | `<strong>` タグ |
+| 取り消し線 | `<s>` タグ |
+| リスト | 箇条書き |
+| 文章の配置 | テキスト揃え |
+| リンク | URL追加 |
+| 引用 | 引用ブロック |
+| コード | コードブロック |
+| 削除 | ブロック削除 |
+| 音声を編集 | 音声コンテンツ用 |
+
+## ブロック挿入メニュー（「メニューを開く」ボタン）
+
+空の段落で表示される「+」ボタンから開くメニュー。
+
+| ボタン | 機能 | 備考 |
+|--------|------|------|
+| AIアシスタント | AI支援 | |
+| 画像 | 画像アップロード | file_upload フロー |
+| 音声 | 音声アップロード | |
+| 埋め込み | oEmbed URL | YouTube/X等対応。OpenAIブログは非対応 |
+| ファイル | ファイル添付 | |
+| 目次 | H2/H3から自動生成 | |
+| 大見出し | H2 | |
+| 小見出し | H3 | |
+| 箇条書きリスト | `<ul>` | |
+| 番号付きリスト | `<ol>` | |
+| 引用 | blockquote | |
+| コード | pre/code | 表示専用（HTML実行不可） |
+| 区切り線 | `<hr>` | |
+| 有料エリア指定 | ペイウォール設定 | |
+
+## 画像ツールバー
+
+画像をクリックすると表示されるツールバー。
+
+| ボタン | 機能 |
+|--------|------|
+| リンク | 画像にURLリンクを追加 |
+| 代替テキスト | alt属性 |
+| 縮小 | 画像サイズ縮小 |
+| 画像の配置 | 左寄せ/中央/右寄せ |
+| 削除 | 画像を削除 |
+
+## 画像操作フロー
+
+### 画像挿入
+1. 空の段落をクリック
+2. 「メニューを開く」(+ボタン)をクリック
+3. 「画像」をクリック
+4. ファイルチューザーが開く → `browser_file_upload` で絶対パスを指定
+
+### 画像削除
+1. 画像（figure要素）をクリック
+2. ツールバーが表示される
+3. 「削除」をクリック
+
+### 画像差し替え
+削除 → 挿入の2ステップ。直接差し替えはできない。
+
+## DOM直接操作によるテキスト装飾
+
+ProseMirrorベースのため、DOM操作後に `input` イベントを発火させる必要がある。
+
+### 太字挿入パターン
+```javascript
+() => {
+  const editor = document.querySelector('.ProseMirror');
+  const paragraphs = editor.querySelectorAll('p');
+  for (const p of paragraphs) {
+    if (p.textContent.includes('対象テキスト')) {
+      p.innerHTML = p.innerHTML.replace('対象テキスト', '<strong>対象テキスト</strong>');
+    }
+  }
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+}
+```
+
+### コンテンツ一括挿入パターン
+```javascript
+() => {
+  const editor = document.querySelector('.ProseMirror');
+  const targetH3 = [...editor.querySelectorAll('h3')].find(h => h.textContent.includes('対象見出し'));
+  const newHTML = '<h3>新見出し</h3><p>本文</p>';
+  targetH3.insertAdjacentHTML('beforebegin', newHTML);
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+}
+```
+
+## 埋め込み機能
+
+### 対応サービス
+YouTube、X（Twitter）等のoEmbed対応サービス。
+
+### 非対応サービス
+OpenAIブログ、一般的なWebページ → テキストリンクで対応。
+
+### 操作フロー
+1. 空段落の「メニューを開く」→「埋め込み」
+2. URL入力フィールドが表示される
+3. URLを入力 → 「適用」
+4. oEmbed非対応の場合はエラー（`Failed to load resource`）
+
+## 目次（TOC）
+
+### 挿入方法
+1. 空段落の「メニューを開く」→「目次」
+2. H2/H3見出しから自動生成
+
+### 仕様
+- 記事内の全H2/H3をリンク付きリストで表示
+- 折りたたみ可能（「すべて表示」ボタン）
+- 見出し変更時は自動更新
+
+## 公開フロー（実証済み 2026-03-12）
+
+### エディタ → 公開設定 → 投稿
+```
+1. 記事作成・編集完了
+2. 「公開に進む」クリック → editor.note.com/notes/<id>/publish/ に遷移
+3. ハッシュタグ設定（combobox: 入力→ドロップダウン選択。複数追加可）
+4. 記事タイプ確認（無料/有料）
+5. マガジン追加確認
+6. 詳細設定確認（クリエイターページ表示、AI学習還元、コメント、予約投稿）
+7. 「投稿する」クリック → 公開
+8. スキ設定画面に遷移（like_reaction_setting）→ 設定 or スキップ
+9. noteトップページに遷移（公開完了）
+```
+
+### ハッシュタグ操作の詳細
+- comboboxに文字入力 → ドロップダウンに候補表示（件数付き）
+- 候補をクリックで追加。タグはチップ表示（×で削除可能）
+- 本文から自動候補も表示される（入力欄の下）
+- `slowly: true` での入力が安定
+
+### スキ設定画面（投稿直後に遷移）
+URL: `https://note.com/like_reaction_setting?kind=recommend`
+
+| 項目 | 内容 |
+|------|------|
+| 表示する画像 | アップロード or プリセット（ネコ/Thank you/空/イヌ/カレンダー） |
+| 表示するメッセージ | テキストボックス（デフォルト:「ありがとう！励みになります！」） |
+
+- 「画像をアップロード」: 親要素をクリック → ファイルチューザー → `browser_file_upload`
+- 「これで設定！」で保存、「スキップ」で飛ばし
+- 設定するとバッジ獲得ダイアログが表示される
+
+### beforeunload対策
+エディタから別ページに遷移する際に beforeunload ダイアログが発火する。
+- `browser_evaluate` で `window.onbeforeunload = null` を実行してから遷移
+- または `browser_handle_dialog(accept=true)` で処理
+
 ## 既知の問題
 
 - エディタ離脱時に beforeunload ダイアログが必ず発火する
 - `browser_handle_dialog(accept=true)` で処理必須
+- 埋め込み: oEmbed非対応URLは `Failed to load resource` エラー。テキストリンクで代替
+- コードブロック: 表示専用。HTMLの実行はできない
+- ref値はページ遷移・DOM変更で失効する。操作前に必ず snapshot で取り直す
