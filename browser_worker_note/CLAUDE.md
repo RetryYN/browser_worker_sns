@@ -21,41 +21,6 @@ Claude Code は**設計・実施・改善**の担当者。
 2. **実施**: Playwright MCP を使ったブラウザ操作タスクの実行、ナレッジの蓄積
 3. **改善**: 実行結果から得た学びをスキル・ワークフロー・ナレッジにフィードバック
 
-## 使えるツール
-
-### ブラウザ操作（Playwright MCP）
-
-| ツール | 用途 |
-|--------|------|
-| `mcp__playwright__browser_navigate` | URL遷移 |
-| `mcp__playwright__browser_snapshot` | ページ構造取得（メインの感覚器官） |
-| `mcp__playwright__browser_click` | クリック |
-| `mcp__playwright__browser_type` | テキスト入力 |
-| `mcp__playwright__browser_fill_form` | フォーム一括入力 |
-| `mcp__playwright__browser_press_key` | キー操作 |
-| `mcp__playwright__browser_select_option` | ドロップダウン選択 |
-| `mcp__playwright__browser_take_screenshot` | スクリーンショット |
-| `mcp__playwright__browser_file_upload` | ファイルアップロード |
-| `mcp__playwright__browser_evaluate` | JS実行（DOM操作等） |
-| `mcp__playwright__browser_hover` | ホバー |
-| `mcp__playwright__browser_drag` | ドラッグ |
-| `mcp__playwright__browser_wait_for` | 要素待機 |
-| `mcp__playwright__browser_handle_dialog` | ダイアログ応答 |
-| `mcp__playwright__browser_tabs` | タブ管理 |
-| `mcp__playwright__browser_navigate_back` | 戻る |
-| `mcp__playwright__browser_console_messages` | コンソールログ |
-| `mcp__playwright__browser_network_requests` | ネットワーク監視 |
-| `mcp__playwright__browser_resize` | ウィンドウリサイズ |
-
-### ファイル操作・その他
-
-| ツール | 用途 |
-|--------|------|
-| `Read` / `Write` / `Edit` | ファイル読み書き |
-| `Glob` / `Grep` | ファイル検索・内容検索 |
-| `Bash` | シェルコマンド実行 |
-| `Agent`（Sub-agents） | 並列調査・committee_review |
-
 ## ワークフローとステップ
 
 詳細は `.claude/workflows/run-task.md` を参照。
@@ -202,46 +167,22 @@ Upstream で NoGo の場合、Downstream をスキップしてコストを節約
 
 ## ナレッジ参照ガイド
 
-### god-writing — サブエージェント分業
+スキルローディング・サブエージェントディスパッチ・C×P別スキル選択表の詳細は以下を参照。
 
-**メインが戦略設計（エンティティ → 価値定義 → アウトライン）、サブエージェントが実行（執筆・校正）。**
-
-| 常駐（メイン） | 役割 |
-|---------------|------|
-| `.agent/skills/god-writing/SKILL.md` | 5原則 + 3法則 + ディスパッチ表 |
-| `.agent/skills/god-writing/quality-standards.md` | 品質基準（Level 4以上必須） |
-| `knowledge/content-types.md` | C×P選択 + 演出ガイド |
-| `knowledge/account-concept.md` | ペルソナ・エンティティ生成 |
-
-#### サブエージェントディスパッチ
-
-| Agent | 読ませるファイル | 役割 |
-|-------|----------------|------|
-| **リサーチ** | account-concept, external-sources, research.md | ネタ収集・実演・ハンドオフ |
-| **見出し** | headline-writing, benefit-writing, account-concept | タイトル10案出し + H2見出し最終調整 |
-| **執筆** | Base 6スキル + content-types + account-concept + C×P×媒体別スキル | アウトラインに従い本文生成 |
-| **校正** | quality-standards, proofreading, emphasis-technique, account-concept | 品質判定 + 修正指示 |
-
-ワークフロー詳細・プロンプトテンプレート → `.claude/workflows/generate-content.md`
-C×P×媒体別のスキル選択 → `SKILL.md` の「C×P別スキル選択表」を参照。
-スキルのパス: `.agent/skills/god-writing/`
-
-### ナレッジ・設定
-
-| ファイル | 内容 | 主な利用Agent |
-|---------|------|-------------|
-| `knowledge/account-concept.md` | ペルソナ・ポジショニング・トーン | リサーチ / 執筆 / 校正 |
-| `knowledge/content-types.md` | C1-C8 × P1-P10 + 演出ガイド | 執筆 |
-| `knowledge/external-sources.md` | 巡回先ソース一覧 | リサーチ |
-| `knowledge/characters/team-orchestra.md` | キャラ設定・掛け合いルール | 執筆 |
-| `knowledge/sites/note/image-regulation.md` | 画像レギュレーション（正本） | 執筆 |
-| `knowledge/sites/note/thumbnail-guide.md` | noteサムネイル表示仕様 | 執筆 |
-| `.claude/workflows/research.md` | リサーチフロー | リサーチ |
+| 正本 | 内容 |
+|------|------|
+| `.agent/skills/god-writing/SKILL.md` | 5原則 + スキルローディング + C×P別選択表 + T軸OODA重心ガイド |
+| `.agent/skills/god-writing/quality-standards.md` | 品質基準（Level 4以上必須）+ レギュレーション |
+| `.agent/skills/image-generation/SKILL.md` | 画像生成（CLI・プロンプト設計・保存ルール） |
+| `.claude/workflows/generate-content.md` | 記事生成フロー + サブエージェントプロンプトテンプレート |
+| `.claude/workflows/research.md` | リサーチフロー |
+| `.claude/workflows/x-post.md` | X投稿フロー |
 
 ### コンテンツ設計の原則
 
-- 記事 = **内容 × 構成パターン**（演出は独立レイヤー）
+- 記事 = **内容（C）× 構成パターン（P）× 加工方法（T）**（演出は独立レイヤー）
 - **リードに全結論を入れる**（結論を隠して引っ張る構成は使わない）
+- **難しい話を噛み砕く方向**が正。既知の常識を声高に投稿しない
 
 ## Git
 

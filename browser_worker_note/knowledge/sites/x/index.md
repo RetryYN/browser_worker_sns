@@ -61,7 +61,7 @@
 - [x] インラインポストフォーム（実績: セッション6 — 即時投稿成功）
 - [x] ポスト作成モーダル（/compose/post）（実績: セッション7 — 予約投稿成功）
 - [x] 予約投稿設定（/compose/post/schedule）（実績: セッション7）
-- [ ] 予約投稿一覧（/compose/post/unsent/scheduled） — **優先度: 中**。予約済みポストの確認・管理が必要になったら探索
+- [x] 予約投稿一覧（/compose/post/unsent/scheduled）（実績: セッション13 — 予約編集成功）
 - [x] プロフィールページ（/UaW6wnKW8c87193）（実績: セッション — プロフィール編集成功）
 - [x] プロフィール編集（/settings/profile）（実績: セッション — 名前・Bio・ヘッダー・アイコン更新成功）
 - [ ] 設定画面 — **優先度: 低**。運用上の必要性が出てから探索
@@ -107,14 +107,38 @@
 
 操作手順:
 ```
-1. select_option "月" → 月を選択
-2. select_option "日" → 日を選択
-3. select_option "年" → 年を選択
-4. select_option "時" → 時を選択
-5. select_option "分" → 分を選択
+1. select_option "時" → 時を選択     ← ★時間を先に設定
+2. select_option "分" → 分を選択
+3. select_option "月" → 月を選択     ← 日付は後
+4. select_option "日" → 日を選択
+5. select_option "年" → 年を選択
 6. click "確認する" → ポスト作成画面に戻る
 7. ポスト本文を入力
 8. click "予約設定する" → 予約完了
+```
+
+**⚠ 時間→日付の順序が必須**: 日付を先に変更すると、現在時刻より前の時間が設定されたままになり「過去の日時にポストを予約することはできません」エラーが発生する。時間を先に設定すればこのエラーを回避できる。
+
+### 予約投稿一覧・編集（/compose/post/unsent/scheduled）
+
+予約済みポストの確認・編集が可能。
+
+| 要素 | 型 | 備考 |
+|------|-----|------|
+| 予約投稿ポスト一覧 | button群 | 各予約ポストがボタンとして表示 |
+| scheduledTweetIndicator | button | 編集モーダル内の日時表示（クリックで日時変更） |
+| クリア | button | 予約を解除 |
+| 更新 | button | 日時変更を確定（新規作成時の「確認する」に相当） |
+
+編集手順:
+```
+1. navigate /compose/post/unsent/scheduled → 予約一覧
+2. click 対象ポストのボタン → 編集モーダル表示
+3. click scheduledTweetIndicator → 日時設定画面
+4. select_option で日時変更（時間→日付の順）
+5. click "更新" → モーダルに戻る
+6. 必要に応じて本文・画像を修正
+7. click "予約設定" → 更新完了
 ```
 
 ## 実証済みフロー（最適化パス）
@@ -135,22 +159,46 @@
 
 所要ステップ: 9（うち snapshot 3回）
 
-### 予約投稿（画像付き）— セッション7で成功
+### 予約投稿（画像付き）— セッション7で成功、セッション13で最適化
 
 ```
 1. navigate /compose/post → モーダル表示
 2. click "ポストを予約" → 日時設定画面
-3. select_option "月" / "日" / "年" / "時" / "分" → 各combobox選択
-4. click "確認する" → モーダルに戻る
-5. type（slowly: true）→ 本文入力
-6. click "画像や動画を追加" → ファイルチューザー検出
-7. file_upload → 画像パス指定
-8. [人間承認]
-9. click "予約設定"
-10. snapshot → alert "ポストの送信日時: ..." で成功確認
+3. select_option "時" → 時を選択     ← ★時間を先に
+4. select_option "分" → 分を選択
+5. select_option "月" / "日" / "年"  ← 日付は後
+6. click "確認する" → モーダルに戻る
+7. type（slowly: true）→ 本文入力
+8. click "画像や動画を追加" → ファイルチューザー検出
+9. file_upload → 画像パス指定
+10. [人間承認]
+11. click "予約設定"
+12. snapshot → alert "ポストの送信日時: ..." で成功確認
 ```
 
-所要ステップ: 10（うち snapshot 1回 + 必要に応じて追加）
+所要ステップ: 12（うち snapshot 1回 + 必要に応じて追加）
+
+### バッチ予約投稿（連続スケジューリング）— セッション13で実証
+
+複数ポストを連続予約する場合のパターン。1セッションで7件連続成功。
+
+```
+[ポスト1]
+1. navigate /compose/post
+2. click "ポストを予約" → 日時設定
+3. select_option 時→分→月→日→年（時間先行）
+4. click "確認する"
+5. type（slowly: true）→ 本文
+6. click "画像や動画を追加" → file_upload（画像ありの場合）
+7. click "予約設定"
+8. snapshot → 成功確認
+
+[ポスト2〜N]
+9. navigate /compose/post ← 毎回新規モーダルを開く
+10. 手順2〜8を繰り返す
+```
+
+**注意**: 前のポストの予約完了後、モーダルは閉じてホームに戻る。次のポストは必ず `/compose/post` に再遷移すること。
 
 ### 共通の注意点
 
@@ -158,6 +206,10 @@
 - **画像添付**: click → file_upload の2ステップ。ファイルチューザーは自動検出される
 - **成功検出**: alert 要素。即時="ポストを送信しました。"、予約="ポストの送信日時: ..."
 - **ref値は毎回変わる**: snapshot で都度取得。ハードコードしない
+- **overlay クリックブロック回避**: モーダル内のボタンが `<div>` overlay に遮られて `browser_click` がタイムアウトする場合がある。`browser_evaluate` で `document.querySelector('[data-testid="<testid>"]').click()` を使えば直接クリック可能。よく使う testid:
+  - `scheduledTweetIndicator` — 予約日時表示ボタン
+  - `tweetButton` — 「予約設定」ボタン
+- **予約日時の順序**: 必ず時間（時→分）を先に設定してから日付（月→日→年）を設定する。逆順だと過去日時エラー
 
 ## プロフィール編集（/settings/profile）
 

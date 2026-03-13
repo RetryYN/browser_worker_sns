@@ -19,10 +19,14 @@ params:
     description: 一次ソースURLや主たる参照元URL
     required: false
     example: "https://openai.com/blog/example"
-  - name: content_type
-    description: "content-types の推奨構成（例: C3 × P4）"
+  - name: draft_path
+    description: "校正済み下書きファイルのパス（指定時は generate_text をスキップし、下書きから本文を読み込む）"
     required: false
-    example: "C3 × P4"
+    example: "knowledge/drafts/note_chatgpt-history.md"
+  - name: content_type
+    description: "content-types の推奨構成（例: C3 × P4 × T7）"
+    required: false
+    example: "C3 × P4 × T7"
   - name: topic_main
     description: メイントピック
     required: false
@@ -60,9 +64,29 @@ steps:
     description: |
       新規記事作成ボタンをクリックしてエディタ画面に遷移する
 
-  # 記事本文を生成
+  # 記事本文の取得（下書きファースト）
+  #
+  # draft_path が指定されている場合:
+  #   → 校正済み下書きファイルを読み込み、TITLE / LEAD / BODY / CTA / TAGS を抽出する
+  #   → generate_text と committee_review はスキップする
+  #
+  # draft_path が未指定の場合:
+  #   → /generate-content ワークフローで下書きを作成・校正してから再実行することを推奨
+  #   → フォールバックとして従来の generate_text → committee_review を実行する
+  #
+  - action: load_draft
+    description: |
+      {{draft_path}} が指定されている場合:
+      1. 下書きファイルを Read で読み込む
+      2. ステータスが「校正済み」であることを確認（未校正なら中断）
+      3. フロントマター + 本文から TITLE / LEAD / BODY / CTA / TAGS / 画像マニフェストを抽出
+      4. 画像マニフェストのファイルが実在するか確認
+      {{draft_path}} が未指定の場合はスキップし、次の generate_text ステップに進む
+    when: "{{draft_path}}"
+
   - action: generate_text
-    description: "{{theme}} をテーマに、note向けの長文記事ドラフトを構造化フォーマットで生成する"
+    description: "（フォールバック）{{theme}} をテーマに、note向けの長文記事ドラフトを生成する"
+    when_not: "{{draft_path}}"
     instruction: |
       テーマ「{{theme}}」について、note向けの長文記事ドラフトを作成する。
       読者は「AIを仕事に活かしたい実務者」を想定する。
@@ -99,9 +123,10 @@ steps:
       - AIモデル名や数値を出す場合は断定しすぎず、根拠が曖昧なら留保表現にする
     skill: god-writing
 
-  # 組織的監査（多角レビュー）
+  # 組織的監査（フォールバック時のみ）
   - action: committee_review
     description: "生成した記事を組織的視点で段階的に監査する"
+    when_not: "{{draft_path}}"
     target_text: "{{prev_result}}"
     skill: god-writing
     review_pipeline:

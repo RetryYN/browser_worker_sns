@@ -197,7 +197,21 @@ dependencies: []
 
 ---
 
-## C×P別スキル選択表（執筆Agentが参照）
+## C×P別スキル選択表 + T軸OODA重心ガイド（執筆Agentが参照）
+
+### T軸（加工方法）— OODA重心指示
+
+T軸の定義は `knowledge/content-types.md` を正本とする。T軸はスキル追加ではなく、執筆Agentの**OODAループのどこに重心を置くか**を決める。
+
+| T | 加工方法 | OODA重心 | 執筆Agentへの指示 |
+|---|---------|---------|-----------------|
+| T1 | 情報整理 | Observe | 事実を漏れなく拾い、構造化して並べる |
+| T2 | 情報翻訳 | Orient | 読者の言葉に置き換える。専門用語を体験に変換 |
+| T3 | 情報解釈 | Detect | 事実に「こう読める」を加える。一次解釈を前面に |
+| T4 | 検証 | Detect+Interpret | 「本当？」を確かめた過程と結果を見せる |
+| T5 | 実践 | Interpret | やった結果を読者の行動に翻訳する |
+| T6 | 比較 | Orient+Detect | 同一基準で並べ、差分を際立たせる |
+| T7 | 対比 | Orient→Detect | 常識仮説を立て、事実で覆す |
 
 ### 内容（C）別
 
@@ -230,7 +244,7 @@ dependencies: []
 ### 読み込み例
 
 ```
-C3（ニュース）× P4（逆三角形）× note記事 の場合:
+C3（ニュース）× P4（逆三角形）× T7（対比）× note記事 の場合:
 
 執筆Agent が読むもの:
   常駐:  SKILL.md, quality-standards, three-nots,
@@ -238,10 +252,12 @@ C3（ニュース）× P4（逆三角形）× note記事 の場合:
          content-types, account-concept
   C3:    headline-writing, hook-creation, trust-building
   P4:    headline-writing（重複→1回）, hook-creation（重複→1回）
+  T7:    OODA重心 = Orient→Detect（常識仮説を立て、事実で覆す）
   note:  paragraph-design, readability-optimization
 
 校正Agent が読むもの:
   quality-standards, proofreading, emphasis-technique, account-concept
 
+→ T軸はスキル追加ではなく、OODAループの重心指示として機能する
 → メインコンテキストは2ファイルのみ。重いスキルはAgent内で完結
 ```

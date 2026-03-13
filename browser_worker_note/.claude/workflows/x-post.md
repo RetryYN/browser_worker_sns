@@ -46,7 +46,8 @@ description: X投稿をテーマ指定またはおまかせで一気通貫実行
 2. `knowledge/account-concept.md` — ペルソナ・トーン
 3. `knowledge/sites/x/posting-strategy.md` — パターン10型・配置ルール
 4. `knowledge/sites/x/index.md` — 実証済みフロー・注意事項
-5. `.agent/skills/god-writing/SKILL.md`
+5. `.agent/skills/god-writing/SKILL.md` — 5原則 + スキルローディング
+6. `.agent/skills/god-writing/quality-standards.md` — 品質基準 + テーマ選定の原則
 
 ---
 

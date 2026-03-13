@@ -21,10 +21,17 @@
 - Neta Type:
 - Topic Main:
 - Topic Sub:
+- Info Vectors:
+  - semantic:
+  - awareness: 高/中/低
+  - discovery:
+  - forgotten:
+  - psychological:
 - Demo Decision: OK / partial / NG
 - Demo Memo:
 - Verification Status: pending / verified / partial
-- Content Type:
+- Content Type (C×P×T):
+- Treatment:
 - X Pattern:
 - Misaki Fit: high / medium / low
 - One-line Core:
@@ -38,7 +45,14 @@
 ```yaml
 theme: ""
 source_url: ""
-content_type: ""
+content_type: ""  # C×P×T（例: C3×P4×T7）
+treatment: ""     # 加工方法の一言説明
+info_vectors:
+  semantic: ""
+  awareness: ""
+  discovery: ""
+  forgotten: ""
+  psychological: ""
 topic_main: ""
 topic_sub: ""
 research_brief: ""

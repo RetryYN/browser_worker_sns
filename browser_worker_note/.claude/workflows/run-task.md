@@ -511,8 +511,9 @@ resolved_step = resolve_templates(raw_step, {
 4. `policies.yaml` の `forbidden_actions` に該当しないことを確認してから操作する
 5. 操作結果を `step_results` に記録する
 
-**注意: noteブロックエディタについて**
-noteの記事エディタは `contenteditable` ベースのブロックエディタであり、通常の `fill_form` では入力できない場合がある。その場合は `browser_click` でエディタ領域をフォーカスしてから `browser_type` で入力する、または `browser_evaluate` でDOM操作する。詳細はサイトナレッジ（`knowledge/sites/note/`）を参照。
+**ブラウザ操作の共通パターン**
+`browser_type` がタイムアウトする textarea 等のワークアラウンドは `knowledge/sites/common/browser-patterns.md` を参照。
+noteの記事エディタは `contenteditable` ベースのブロックエディタであり、通常の `fill_form` では入力できない場合がある。詳細はサイトナレッジ（`knowledge/sites/note/`）を参照。
 
 ### G-5. action: verify
 

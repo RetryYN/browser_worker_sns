@@ -17,6 +17,7 @@
 
 import argparse
 import base64
+import json
 import re
 import sys
 from datetime import datetime
@@ -793,6 +794,36 @@ def _slugify_topic(value: str | None) -> str:
     return raw or "untitled"
 
 
+def _save_prompt_log(
+    *,
+    image_type: str,
+    style: str | None,
+    topic: str | None,
+    prompt: str,
+    full_prompt: str,
+    ref_chars: list[str],
+    output_path: Path,
+) -> None:
+    """画像生成のプロンプト・パラメータをJSONLログに追記する。"""
+    log_dir = ROOT / "knowledge" / "logs" / "image-generation"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "prompt-log.jsonl"
+
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "image_type": image_type,
+        "style": style,
+        "topic": topic,
+        "user_prompt": prompt,
+        "full_prompt": full_prompt,
+        "ref_chars": ref_chars,
+        "output_file": str(output_path.name),
+    }
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    print(f"[generate] prompt logged: {log_file}")
+
+
 # --- 用途別パラメータ ---
 
 PARAMS = {
@@ -996,6 +1027,18 @@ def generate(image_type: str, prompt: str, topic: str | None = None,
 
     img.save(output_path, "JPEG", quality=90)
     print(f"[generate] saved: {output_path}")
+
+    # プロンプトログ記録
+    _save_prompt_log(
+        image_type=image_type,
+        style=style,
+        topic=topic,
+        prompt=prompt,
+        full_prompt=full_prompt,
+        ref_chars=ref_chars,
+        output_path=output_path,
+    )
+
     return output_path
 
 
@@ -1081,12 +1124,22 @@ def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[P
             f"The label reads \"{label}\" — render it in a high-contrast banner at the bottom."
         )
         print(f"\n[x-grid] generating panel {num}: {label}")
-        path = generate("x-grid", panel_prompt, topic=None)
+        path = generate("x-grid", panel_prompt, topic=topic)
 
-        # リネーム
+        # リネーム（generate() のログは一時名で記録済みだが、最終名を追加ログする）
         final_name = f"x_grid_panel-{num}_{topic_slug}_{date_str}.jpg"
         final_path = output_dir / final_name
         path.rename(final_path)
+        # 最終ファイル名をプロンプトログに追記
+        _save_prompt_log(
+            image_type=f"x-grid-panel-{num}",
+            style=None,
+            topic=topic,
+            prompt=panel_prompt,
+            full_prompt="(see x-grid entry above)",
+            ref_chars=[],
+            output_path=final_path,
+        )
         with Image.open(final_path) as panel_img:
             resized = panel_img.convert("RGB").resize((1200, 675), Image.LANCZOS)
             resized.save(final_path, "JPEG", quality=90)

@@ -21,15 +21,20 @@
 
 | Ready At | Title | Type | Pattern | Post Angle | Image Plan | Source | Verification Log | Status |
 |---|---|---|---|---|---|---|---|---|
-| 2026-03-12 | 例: AI選手権クイズ | update | quiz-senshuken | 新機能を4択に変換 | quiz-choice | https://example.com | knowledge/logs/research/2026-03-12.md | ready |
 
 ## Scheduled
 
 | Schedule | Title | Pattern | Asset | Source | Status | Notes |
 |---|---|---|---|---|---|---|
-| 2026-03-15 20:00 | 例: Xグリッド4コマ | xgrid-4koma | knowledge/data/images/x_grid_panel-1_example_2026-03-12.jpg ほか | https://example.com | scheduled | 水曜昼向け |
+| 2026-03-13 15:00 | Claude偽サイト注意喚起（正規vs偽比較） | trend-sokuhou | knowledge/data/images/x_claude_real_vs_fake_2026-03-13.png | Xトレンド「Claude偽サイト」 | scheduled | 比較スクショ付き。半減期52分内に投稿 |
 | 2026-03-13 20:00 | AIがブラウザ操作して投稿してる裏側 | 裏側公開 + 図解 | knowledge/data/images/note_diagram_ai-posting-flow_2026-03-12.jpg | オリジナル | scheduled | 金曜夜ミサキ層ゴールデンタイム |
-| 2026-03-16 20:00 | AIで一番「これは助かった」って場面、なに？ | 参加型お題(sankagata-odai) | knowledge/data/images/note_diagram_ai活用お題_2026-03-12.jpg | オリジナル | scheduled | 月曜夜S級リプ誘発。キャラ被り発生→generate_image.py修正済み |
+| 2026-03-14 07:00 | 土曜朝tips: 来週のメールAIで下書き | 朝tips | なし | オリジナル | scheduled | テキストのみ |
+| 2026-03-14 12:00 | AI4種使い分け（ChatGPT/Claude/Gemini/Copilot） | 図解 | knowledge/data/images/note_diagram_ai4種の使い分け_2026-03-13.jpg | オリジナル | scheduled | 画像付き |
+| 2026-03-14 20:00 | 【土曜のお題】AIに何やらせる？ | 参加型お題(sankagata-odai) | なし | オリジナル | scheduled | テキストのみ。リプ誘発 |
+| 2026-03-15 07:00 | 日曜朝tips: 月曜の会議準備AI活用 | 朝tips | なし | オリジナル | scheduled | テキストのみ |
+| 2026-03-15 12:00 | AIへの指示3つのコツ（役割・条件・形式） | 図解 | knowledge/data/images/note_diagram_プロンプト3つのコツ_2026-03-13.jpg | オリジナル | scheduled | 画像付き。保存推奨 |
+| 2026-03-15 20:00 | AI使い始め1ヶ月の壁（聞き方が変わると変わる） | 共感系 | なし | オリジナル | scheduled | テキストのみ |
+| 2026-03-16 07:00 | AIで一番「これは助かった」って場面、なに？ | 参加型お題(sankagata-odai) | knowledge/data/images/note_diagram_ai活用お題_2026-03-12.jpg | オリジナル | scheduled | 月曜朝に変更（元20:00）。S級リプ誘発 |
 
 ## Posted
 
@@ -41,4 +46,3 @@
 
 | Date | Title | Reason |
 |---|---|---|
-| 2026-03-12 | 例: 小さなUI文言変更 | 実読価値が薄い |
