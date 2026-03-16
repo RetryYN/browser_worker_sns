@@ -177,6 +177,9 @@ Upstream で NoGo の場合、Downstream をスキップしてコストを節約
 | `.claude/workflows/generate-content.md` | 記事生成フロー + サブエージェントプロンプトテンプレート |
 | `.claude/workflows/research.md` | リサーチフロー |
 | `.claude/workflows/x-post.md` | X投稿フロー |
+| `.claude/workflows/x-reply.md` | Xリプライフロー |
+| `.claude/workflows/improve.md` | 改善サイクル（メトリクス回収→分析→戦略更新） |
+| `knowledge/sites/x/reply-strategy.md` | リプ戦略（ターゲット・検索ワード・トーン・few-shot） |
 
 ### コンテンツ設計の原則
 

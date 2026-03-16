@@ -1,0 +1,33 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#2d5a1e",
+    "primaryTextColor": "#f0f0e8",
+    "primaryBorderColor": "#4a7a3a",
+    "lineColor": "#7a9a68",
+    "secondaryColor": "#5c3d1e",
+    "secondaryTextColor": "#f0e6d0",
+    "secondaryBorderColor": "#8a6a48",
+    "tertiaryColor": "#3a6a8a",
+    "tertiaryTextColor": "#e0f0ff",
+    "tertiaryBorderColor": "#5a8aaa",
+    "noteBkgColor": "#f0e4d0",
+    "noteTextColor": "#2e3a1e",
+    "noteBorderColor": "#c8b898",
+    "edgeLabelBackground": "#1a2e14",
+    "background": "#1a2e14",
+    "mainBkg": "#2d5a1e",
+    "nodeBorder": "#4a7a3a",
+    "clusterBkg": "#1e3a16",
+    "clusterBorder": "#4a7a3a",
+    "titleColor": "#d0e8c0",
+    "actorBkg": "#2d5a1e",
+    "actorBorder": "#4a7a3a",
+    "actorTextColor": "#f0f0e8",
+    "labelBoxBkgColor": "#2d5a1e",
+    "labelBoxBorderColor": "#4a7a3a",
+    "labelTextColor": "#f0f0e8",
+    "fontSize": "16px",
+    "fontFamily": "Noto Sans JP, sans-serif"
+  }
+}

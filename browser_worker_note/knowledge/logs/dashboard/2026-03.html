@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delvework Dashboard — 2026-03</title>
+<title>Delvework for SNS — 2026-03</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg: #08090d; --bg2: #0d0f15; --surface: #12141c; --surface2: #181b26;
-  --surface3: #1e2130; --border: #252839; --border2: #333658;
-  --text: #eaeaf0; --text2: #c8c8d0; --muted: #7c809a;
-  --accent: #6366f1; --accent2: #818cf8; --accent-bg: rgba(99,102,241,0.08);
-  --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
-  --pink: #ec4899; --teal: #14b8a6; --orange: #f97316; --purple: #8b5cf6; --cyan: #06b6d4;
+  /* 森テーマ: ヘッダー=深緑の葉, サイド=幹, 背景=芝生, カード=ガーデニング */
+  --bg: #c8d8a8; --bg2: #bdd19e; --surface: #f0e4d0; --surface2: #e8daC2;
+  --surface3: #ddd0b4; --border: #c8b898; --border2: #b8a880;
+  --text: #2e3a1e; --text2: #4a5438; --muted: #7a8068;
+  --accent: #4a7a3a; --accent2: #3d6830; --accent-bg: rgba(74,122,58,0.1);
+  --green: #4a8c3a; --yellow: #b89a2a; --red: #b85a3a; --blue: #4a7a9e;
+  --pink: #c07a7a; --teal: #4a9a80; --orange: #c08a40; --purple: #8a6ea0; --cyan: #4a9494;
+  /* 構造別カラー */
+  --header-bg: #1e3a1e; --header-text: #d0e8c0;
+  --sidebar-bg: #5c3d1e; --sidebar-text: #f0e6d0;
   --header-h: 52px; --sidebar-w: 220px;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -21,47 +25,47 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI','Noto San
 
 /* ===== ヘッダー ===== */
 .header {
-  height:var(--header-h); background:var(--surface); border-bottom:1px solid var(--border);
+  height:var(--header-h); background:var(--header-bg); border-bottom:1px solid #153015;
   display:flex; align-items:center; padding:0 20px; position:fixed; top:0; left:0; right:0; z-index:200;
 }
-.header-brand { font-weight:800; font-size:1rem; margin-right:32px; letter-spacing:-0.02em; color:var(--accent2); }
+.header-brand { font-weight:800; font-size:1rem; margin-right:32px; letter-spacing:-0.02em; color:#fff; }
 .header-tabs { display:flex; gap:2px; }
 .header-tab {
-  background:none; border:none; color:var(--muted); font-size:0.8rem; font-weight:500;
+  background:none; border:none; color:rgba(255,255,255,0.7); font-size:0.8rem; font-weight:500;
   padding:6px 16px; cursor:pointer; border-radius:6px; transition:all 0.15s;
 }
-.header-tab:hover { background:var(--surface2); color:var(--text2); }
-.header-tab.active { background:var(--accent-bg); color:var(--accent2); font-weight:700; }
+.header-tab:hover { background:rgba(255,255,255,0.1); color:#fff; }
+.header-tab.active { background:rgba(255,255,255,0.15); color:#fff; font-weight:700; }
 .header-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
 .account-select {
-  background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff;
   padding:5px 12px; border-radius:6px; font-size:0.78rem; cursor:pointer; outline:none;
 }
-.account-select:focus { border-color:var(--accent); }
-.header-meta { color:var(--muted); font-size:0.72rem; }
+.account-select:focus { border-color:rgba(255,255,255,0.4); }
+.header-meta { color:rgba(255,255,255,0.7); font-size:0.72rem; }
 
 /* ===== レイアウト ===== */
 .layout { display:flex; margin-top:var(--header-h); height:calc(100vh - var(--header-h)); }
 
 /* ===== サイドバー ===== */
 .sidebar {
-  width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border);
+  width:var(--sidebar-w); background:var(--sidebar-bg); border-right:1px solid #4a2e14;
   overflow-y:auto; flex-shrink:0; display:none; /* JS で active を付与 */
 }
 .sidebar.active { display:flex; flex-direction:column; }
 .sidebar-section { padding:16px 0 8px; }
-.sidebar-label { color:var(--muted); font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; padding:0 16px 6px; font-weight:700; }
+.sidebar-label { color:#b8a888; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; padding:0 16px 6px; font-weight:700; }
 .side-item {
   display:flex; align-items:center; gap:8px; padding:7px 16px; cursor:pointer;
-  color:var(--text2); font-size:0.8rem; transition:all 0.12s; border-left:3px solid transparent;
+  color:var(--sidebar-text); font-size:0.8rem; transition:all 0.12s; border-left:3px solid transparent;
 }
-.side-item:hover { background:var(--surface2); color:var(--text); }
-.side-item.active { background:var(--accent-bg); color:var(--accent2); border-left-color:var(--accent); font-weight:600; }
+.side-item:hover { background:rgba(255,255,255,0.06); color:#fff; }
+.side-item.active { background:rgba(74,122,58,0.2); color:#a0d890; border-left-color:#4a7a3a; font-weight:600; }
 .side-icon { font-size:0.85rem; width:16px; text-align:center; flex-shrink:0; opacity:0.7; }
-.side-badge { margin-left:auto; background:var(--accent); color:#fff; font-size:0.6rem; padding:1px 6px; border-radius:8px; font-weight:700; }
+.side-badge { margin-left:auto; background:#4a7a3a; color:#fff; font-size:0.6rem; padding:1px 6px; border-radius:8px; font-weight:700; }
 
-.sidebar-footer { margin-top:auto; padding:12px 16px; border-top:1px solid var(--border); }
-.sidebar-footer span { color:var(--muted); font-size:0.68rem; line-height:1.6; }
+.sidebar-footer { margin-top:auto; padding:12px 16px; border-top:1px solid #4a2e14; }
+.sidebar-footer span { color:#b8a888; font-size:0.68rem; line-height:1.6; }
 
 /* ===== コンテンツ ===== */
 .content { flex:1; overflow-y:auto; background:var(--bg2); }
@@ -99,7 +103,7 @@ th { text-align:left; color:var(--muted); font-weight:600; padding:7px 8px; bord
 th:hover { color:var(--text); }
 th .sa { font-size:0.6rem; margin-left:2px; opacity:0.4; }
 td { padding:6px 8px; border-bottom:1px solid var(--border); }
-tr:hover td { background:rgba(99,102,241,0.03); }
+tr:hover td { background:rgba(74,122,58,0.06); }
 
 .bdg { display:inline-block; padding:1px 7px; border-radius:5px; font-size:0.68rem; font-weight:600; }
 .bdg-posted { background:rgba(34,197,94,0.1); color:var(--green); }
@@ -140,7 +144,7 @@ tr:hover td { background:rgba(99,102,241,0.03); }
 
 
 <header class="header">
-  <div class="header-brand">Delvework</div>
+  <div class="header-brand">Delvework for SNS</div>
   <div class="header-tabs">
     <button class="header-tab active" data-platform="integrated">統合</button>
     <button class="header-tab" data-platform="x">X</button>
@@ -162,7 +166,7 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="sidebar-section">
     <div class="sidebar-label">分析</div>
     <div class="side-item" data-page="i-competitive"><span class="side-icon">&#9733;</span>競合分析</div>
-    <div class="side-item" data-page="i-trend"><span class="side-icon">&#9650;</span>トレンド観測<span class="side-badge">1</span></div>
+    <div class="side-item" data-page="i-trend"><span class="side-icon">&#9650;</span>トレンド観測<span class="side-badge">2</span></div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">運用</div>
@@ -175,11 +179,15 @@ tr:hover td { background:rgba(99,102,241,0.03); }
 <aside class="sidebar" id="sidebar-x">
   <div class="sidebar-section">
     <div class="sidebar-label">分析</div>
-    <div class="side-item active" data-page="x-overview"><span class="side-icon">&#9632;</span>概況<span class="side-badge">3</span></div>
+    <div class="side-item active" data-page="x-overview"><span class="side-icon">&#9632;</span>概況<span class="side-badge">14</span></div>
     <div class="side-item" data-page="x-patterns"><span class="side-icon">&#9830;</span>パターン分析</div>
+    <div class="side-item" data-page="x-content-type"><span class="side-icon">&#9670;</span>コンテンツ種別</div>
     <div class="side-item" data-page="x-pillars"><span class="side-icon">&#9878;</span>柱バランス</div>
     <div class="side-item" data-page="x-timeslot"><span class="side-icon">&#9200;</span>曜日×時間帯</div>
-    <div class="side-item" data-page="x-images"><span class="side-icon">&#9635;</span>画像分析<span class="side-badge">1</span></div>
+    <div class="side-item" data-page="x-images"><span class="side-icon">&#9635;</span>画像分析</div>
+    <div class="side-item" data-page="x-note-link"><span class="side-icon">&#9741;</span>note連動</div>
+    <div class="side-item" data-page="x-cross"><span class="side-icon">&#9851;</span>クロス分析</div>
+    <div class="side-item" data-page="x-improve"><span class="side-icon">&#9888;</span>改善分析</div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">データ</div>
@@ -192,7 +200,7 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="sidebar-section">
     <div class="sidebar-label">分析</div>
     <div class="side-item active" data-page="n-overview"><span class="side-icon">&#9632;</span>概況</div>
-    <div class="side-item" data-page="n-articles"><span class="side-icon">&#9776;</span>記事一覧</div>
+    <div class="side-item" data-page="n-articles"><span class="side-icon">&#9776;</span>競合アカウント<span class="side-badge">28</span></div>
     <div class="side-item" data-page="n-categories"><span class="side-icon">&#9830;</span>カテゴリ別</div>
     <div class="side-item" data-page="n-trends"><span class="side-icon">&#9650;</span>PV推移</div>
   </div>
@@ -205,21 +213,28 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="page-head"><h2>サマリー</h2><p>2026-03 — 全プラットフォーム横断のパフォーマンス概況</p></div>
   <div class="page-body">
     <div class="kpi-row">
-      <div class="kpi"><div class="kpi-label">総投稿数</div><div class="kpi-val" style="color:var(--accent)">3</div></div>
-      <div class="kpi"><div class="kpi-label">総リーチ</div><div class="kpi-val">0</div></div>
-      <div class="kpi"><div class="kpi-label">投稿済</div><div class="kpi-val" style="color:var(--green)">2</div></div>
-      <div class="kpi"><div class="kpi-label">予約</div><div class="kpi-val" style="color:var(--yellow)">2</div></div>
+      <div class="kpi"><div class="kpi-label">総投稿数</div><div class="kpi-val" style="color:var(--accent)">14</div></div>
+      <div class="kpi"><div class="kpi-label">総リーチ</div><div class="kpi-val">436</div></div>
+      <div class="kpi"><div class="kpi-label">投稿済</div><div class="kpi-val" style="color:var(--green)">14</div></div>
+      <div class="kpi"><div class="kpi-label">予約</div><div class="kpi-val" style="color:var(--yellow)">0</div></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>目標 vs 実績</h3><span class="sec-tag">rules テーブル</span></div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">日次投稿</div><div class="kpi-val" style="color:var(--green)">2.8</div><div class="kpi-sub">目標 3/日</div></div>
+        <div class="kpi"><div class="kpi-label">日次リプライ</div><div class="kpi-val" style="color:var(--red)">0</div><div class="kpi-sub">目標 80/日</div></div>
+        <div class="kpi"><div class="kpi-label">週次RT</div><div class="kpi-val" style="color:var(--red)">0</div><div class="kpi-sub">目標 10/週</div></div>
+      </div>
     </div>
     <div class="sec"><div class="sec-head"><h3>プラットフォーム別</h3><span class="sec-tag">2026-03</span></div>
       <div class="pf-card">
         <div class="pf-icon" style="background:rgba(29,161,242,0.1);color:#1da1f2">X</div>
         <div><div style="font-weight:600;margin-bottom:5px">X（旧Twitter）</div>
           <div class="pf-stats">
-            <div><div class="pf-st-l">投稿</div><div class="pf-st-v">3</div></div>
-            <div><div class="pf-st-l">インプレッション</div><div class="pf-st-v">0</div></div>
-            <div><div class="pf-st-l">ER</div><div class="pf-st-v" style="color:var(--green)">0.0%</div></div>
+            <div><div class="pf-st-l">投稿</div><div class="pf-st-v">14</div></div>
+            <div><div class="pf-st-l">インプレッション</div><div class="pf-st-v">436</div></div>
+            <div><div class="pf-st-l">ER</div><div class="pf-st-v" style="color:var(--green)">8.33%</div></div>
             <div><div class="pf-st-l">リプライ</div><div class="pf-st-v" style="color:var(--blue)">0</div></div>
-            <div><div class="pf-st-l">いいね</div><div class="pf-st-v" style="color:var(--pink)">0</div></div>
+            <div><div class="pf-st-l">いいね</div><div class="pf-st-v" style="color:var(--pink)">1</div></div>
           </div>
         </div>
       </div>
@@ -241,22 +256,32 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   </div>
 </div>
 <div class="page" id="page-i-competitive">
-  <div class="page-head"><h2>競合分析</h2><p>競合アカウントの追跡・ベンチマーク比較</p></div>
+  <div class="page-head"><h2>競合分析</h2><p>X 73件 + note 28件 追跡中</p></div>
   <div class="page-body">
-    <div class="sec"><div class="sec-head"><h3>競合 / ベンチマークレポート</h3><span class="sec-tag">0件</span></div><div class="empty"><div class="empty-icon">&#9733;</div><div class="empty-title">競合データ未収集</div>
-<div class="empty-desc">X Search を使った競合分析が利用可能です。</div>
-<div class="empty-cmd">python scripts/x_search.py competitor --period 14d</div><br>
-<div class="empty-cmd">python scripts/x_search.py benchmark --period 30d</div></div></div>
-    <div class="sec"><div class="sec-head"><h3>設定状況</h3></div>
-      <div class="item-meta" style="padding:8px">追跡アカウント: 0件 — config/platforms.yaml の competitive.accounts で管理</div>
+    <div class="kpi-row"><div class="kpi"><div class="kpi-label">X ng</div><div class="kpi-val" style="color:var(--red)">24</div></div><div class="kpi"><div class="kpi-label">X benchmark</div><div class="kpi-val" style="color:var(--green)">23</div></div><div class="kpi"><div class="kpi-label">X news</div><div class="kpi-val" style="color:var(--blue)">16</div></div><div class="kpi"><div class="kpi-label">X visual</div><div class="kpi-val" style="color:var(--purple)">4</div></div><div class="kpi"><div class="kpi-label">X growth</div><div class="kpi-val" style="color:var(--teal)">3</div></div><div class="kpi"><div class="kpi-label">X engagement</div><div class="kpi-val" style="color:var(--yellow)">3</div></div><div class="kpi"><div class="kpi-label">note benchmark</div><div class="kpi-val" style="color:var(--green)">13</div></div><div class="kpi"><div class="kpi-label">note ng</div><div class="kpi-val" style="color:var(--red)">10</div></div><div class="kpi"><div class="kpi-label">note news</div><div class="kpi-val" style="color:var(--blue)">5</div></div></div>
+    <div class="sec"><div class="sec-head"><h3>X ベンチマーク</h3><span class="sec-tag">23件</span></div>
+      <div class="tw"><table><thead><tr><th>ハンドル</th><th>名前</th><th>カテゴリ</th><th>フォロワー</th><th>フォーク方向</th></tr></thead><tbody><tr><td>@AI_EC_Hacker</td><td>AI_EC_Hacker</td><td>実演×データ分析</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="データ→即チャート。Excel30分→30秒。非エンジニア向けデータ可視化の型">データ→即チャート。Excel30分→30秒。非エンジニア向けデータ可視化の型</td></tr><tr><td>@CyberAgent_PR</td><td>サイバーエージェント広報</td><td>企業AI活用公式</td><td style="text-align:right">50,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業公式のデータドリブン発信。数値+事例の信頼構築パターン">企業公式のデータドリブン発信。数値+事例の信頼構築パターン</td></tr><tr><td>@DeNA_fullswing</td><td>フルスイング by DeNA</td><td>企業AI活用メディア</td><td style="text-align:right">30,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI活用100本ノック。動画→GAS自動生成の実演フォーマット">AI活用100本ノック。動画→GAS自動生成の実演フォーマット</td></tr><tr><td>@DeNAxAI_NEWS</td><td>DeNA AI</td><td>企業AI活用公式</td><td style="text-align:right">5,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Devin全社導入の5段階レベル評価。体系的フレームワークの見せ方">Devin全社導入の5段階レベル評価。体系的フレームワークの見せ方</td></tr><tr><td>@JAPAN_AI_pr</td><td>JAPAN AI公式</td><td>AI導入支援企業</td><td style="text-align:right">8,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI導入プロジェクト設計の裏側note発信。企業視点の深い考察">AI導入プロジェクト設計の裏側note発信。企業視点の深い考察</td></tr><tr><td>@SuguruKun_ai</td><td>すぐる|ChatGPTガチ勢</td><td>AI活用Tips</td><td style="text-align:right">80,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="画像+ステップ形式のスレッド構成。Likes3000超のバズ型をうちの実演コンテンツに適用">画像+ステップ形式のスレッド構成。Likes3000超のバズ型をうちの実演コンテンツに適用</td></tr><tr><td>@Takuma_Uemura_</td><td>上村拓馬｜税理士</td><td>専門実務×AI自動化</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="手本+指示+元データの3点セット手法。再現可能な手順の型化">手本+指示+元データの3点セット手法。再現可能な手順の型化</td></tr><tr><td>@career_koumei</td><td>キャリア孔明</td><td>転職×AI</td><td style="text-align:right">30,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="転職×ChatGPT活用。キャリア不安層への刺さり方をフォーク">転職×ChatGPT活用。キャリア不安層への刺さり方をフォーク</td></tr><tr><td>@hobo_gws_dx</td><td>ホボ｜Google AI実務ハック</td><td>Google×AI実務自動化</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="NotebookLM×GASで無料完結。ミサキ層が再現しやすいGoogle系">NotebookLM×GASで無料完結。ミサキ層が再現しやすいGoogle系</td></tr><tr><td>@kadop_hrmonyAI</td><td>kadop/採用AI活用</td><td>HR×AI</td><td style="text-align:right">2,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Goodpatch出身。Dify/Zapier/Claude Codeの実務組み合わせ">Goodpatch出身。Dify/Zapier/Claude Codeの実務組み合わせ</td></tr><tr><td>@kaede_gpt</td><td>楓|AI自動化</td><td>非エンジニア×AI自動化</td><td style="text-align:right">25,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="非エンジニア×Claude Codeで丸投げAIチーム化。ミサキ層目線の型">非エンジニア×Claude Codeで丸投げAIチーム化。ミサキ層目線の型</td></tr><tr><td>@kandmybike</td><td>畠山謙人｜税理士</td><td>専門実務×AI自動化</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="専門職×AI自動化の最強型。freee自動仕訳+CLAUDE.md運用を別業種にフォーク">専門職×AI自動化の最強型。freee自動仕訳+CLAUDE.md運用を別業種にフォーク</td></tr><tr><td>@kokisennyu</td><td>せんにゅうさん</td><td>Dify実装×解説</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Difyワークフローの具体実装+DSL共有。ノーコード自動化の解説精度">Difyワークフローの具体実装+DSL共有。ノーコード自動化の解説精度</td></tr><tr><td>@masahirochaen</td><td>茶圓将裕</td><td>AI活用×業務効率化</td><td style="text-align:right">15,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="画像4枚ステップ形式。毎日投稿の量産体制の参考">画像4枚ステップ形式。毎日投稿の量産体制の参考</td></tr><tr><td>@nezumi_uranai</td><td>ねずみ占い</td><td>AI自動化</td><td style="text-align:right">15,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Claude Codeで外注不要の自動化実演。エラー込みのリアル共有">Claude Codeで外注不要の自動化実演。エラー込みのリアル共有</td></tr><tr><td>@nullpodesu</td><td>nullpo</td><td>非エンジニア×AIエージェント</td><td style="text-align:right">8,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="非エンジニアがAIエージェント作成。プロンプト一つで専門化する見せ方">非エンジニアがAIエージェント作成。プロンプト一つで専門化する見せ方</td></tr><tr><td>@pop_ikeda</td><td>池田朋弘</td><td>AI活用普及</td><td style="text-align:right">12,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI活用普及。コロプラ社員92%利用の浸透モデル。組織導入の語り方">AI活用普及。コロプラ社員92%利用の浸透モデル。組織導入の語り方</td></tr><tr><td>@shinmomo0512</td><td>しんもも｜経理22年</td><td>経理×AI実務</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="経理22年ベテランの実務視点レビュー。専門家が語る説得力の出し方">経理22年ベテランの実務視点レビュー。専門家が語る説得力の出し方</td></tr><tr><td>@sora19ai</td><td>そら☁️</td><td>Dify実装×非エンジニア</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="非エンジニアのDify学習パス体系化。GPTs→WF→LINE botのステップ">非エンジニアのDify学習パス体系化。GPTs→WF→LINE botのステップ</td></tr><tr><td>@tetumemo</td><td>テツメモ</td><td>AI実演やってみた</td><td style="text-align:right">12,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Gemini実演のやってみた系。プロンプト公開+Tips共有の型">Gemini実演のやってみた系。プロンプト公開+Tips共有の型</td></tr><tr><td>@trustyyle</td><td>吉田洋介</td><td>HR×AI未来論</td><td style="text-align:right">5,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="HR×AI未来論。アカデミック寄りの考察で差別化。論考フォーマット">HR×AI未来論。アカデミック寄りの考察で差別化。論考フォーマット</td></tr><tr><td>@unikoukokun</td><td>ユニコ｜ClaudeCodeガチ勢</td><td>Claude Code実践</td><td style="text-align:right">-</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Claude Code深掘り。5つのClaudeの違い解説。裏側公開との親和性◎">Claude Code深掘り。5つのClaudeの違い解説。裏側公開との親和性◎</td></tr><tr><td>@usutaku_channel</td><td>usutaku</td><td>就活×AI</td><td style="text-align:right">50,000</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="就活×AI Tips。ミサキ層直撃のテーマ選定と切り口をフォーク">就活×AI Tips。ミサキ層直撃のテーマ選定と切り口をフォーク</td></tr></tbody></table></div>
     </div>
+    <div class="sec"><div class="sec-head"><h3>X NG分析</h3><span class="sec-tag">24件</span></div>
+      <div class="tw"><table><thead><tr><th>ハンドル</th><th>名前</th><th>カテゴリ</th><th>NG理由</th></tr></thead><tbody><tr><td>@09pauai</td><td>ぱうう</td><td>NG:中身スカスカ</td><td style="color:var(--red)">便利プロンプト10選。一般論寄せ集め。具体的な業務適用・検証なし</td></tr><tr><td>@ADHDHSP249834</td><td>ADHDHSP</td><td>NG:煽り批判</td><td style="color:var(--red)">AI裏技商材の危険性を批判する側。NGパターンの言語化参考</td></tr><tr><td>@Arata641</td><td>ユースタ(AI×Kindle出版)</td><td>NG:煽りインフル</td><td style="color:var(--red)">乗り遅れる前に系。AI×Kindle出版の先行者利益煽り。中身薄い</td></tr><tr><td>@ChatgptAIskill</td><td>ケンイチ|AIスキルアカデミー</td><td>NG:AI副業煽り</td><td style="color:var(--red)">無料配布→情報商材誘導。フォロー+いいね+リプで釣る。占い副業月3-5万煽り</td></tr><tr><td>@Haru_hukugyou1</td><td>ハル</td><td>NG:AI副業煽り</td><td style="color:var(--red)">AI副業TOP5。GeminiでXアフィ90%生成、3ヶ月月5-20万。副業ランキング煽り</td></tr><tr><td>@Maruo_0314</td><td>まるお</td><td>NG:情報商材</td><td style="color:var(--red)">与沢翼LP基のAI自動LP作成。Before/After神コピー誇張+配布企画誘導</td></tr><tr><td>@NeuralShareJP</td><td>NeuralShare｜SAPキャリア戦略</td><td>NG:煽りインフル</td><td style="color:var(--red)">9割が知らない系FOMO煽り。必須スキル+ツール○選の量産</td></tr><tr><td>@SarminShahid</td><td>みらい｜AIクリエイター</td><td>NG:中身スカスカ</td><td style="color:var(--red)">煽り構文メタ批判はするが自身も○選リスト量産。専門性なし</td></tr><tr><td>@ai_jitan</td><td>AI時短</td><td>NG:中身スカスカ</td><td style="color:var(--red)">神プロンプト200個集。量で勝負。個々の検証・具体性なし</td></tr><tr><td>@ceo_tommy1</td><td>トミー</td><td>NG:AI副業煽り</td><td style="color:var(--red)">Claudeでブログ記事→日給10万。簡単テクで商品誘導。情報商材パターン</td></tr><tr><td>@f__katsuo</td><td>f__katsuo</td><td>NG:情報商材</td><td style="color:var(--red)">与沢翼LP AIリライトツール配布。いいね&リプ→情報商材LP誘導</td></tr><tr><td>@gin_camp</td><td>gin_camp</td><td>NG:煽りインフル</td><td style="color:var(--red)">煽りタイプのAIインフルエンサー代表例</td></tr><tr><td>@h_www</td><td>h_www</td><td>NG:中身スカスカ</td><td style="color:var(--red)">一般的Tips寄せ集め配布。誰でも書ける内容を数で並べるだけ</td></tr><tr><td>@kagero_ai</td><td>かげろ</td><td>NG:AI副業煽り</td><td style="color:var(--red)">プロンプトだけで月10万達成系。具体的な検証・過程なし</td></tr><tr><td>@kaneki_ai888</td><td>金木｜AI副業</td><td>NG:中身スカスカ</td><td style="color:var(--red)">アフィリエイト用コピペプロンプト○選配布。自分の実体験・検証なし</td></tr><tr><td>@knishigu1117</td><td>西口|AI活用PDF配布</td><td>NG:中身スカスカ</td><td style="color:var(--red)">PDF配布で誘導。プロンプト集コピペ配布。専門性・具体性なし</td></tr><tr><td>@manami_x21</td><td>まなみ｜AI副業</td><td>NG:AI副業煽り</td><td style="color:var(--red)">ChatGPT×占い1日20分月50万。限定GPT配布でフォロワー釣り→誘導</td></tr><tr><td>@mitsunari_ai</td><td>光成AI</td><td>NG:情報商材</td><td style="color:var(--red)">情報商材販売者。批判と販売の矛盾構造</td></tr><tr><td>@noa_gpt</td><td>ノア｜AIで人の脳つくって200万</td><td>NG:AI副業煽り</td><td style="color:var(--red)">時給2万〜20万の穴場副業煽り。無限量産可能と誇張。根拠なし</td></tr><tr><td>@renai_alfa</td><td>AI仮面</td><td>NG:AI自動量産</td><td style="color:var(--red)">寝てる間にフォロワー増。プロンプト1つでポスト量産。具体性ゼロの夢物語煽り</td></tr><tr><td>@shiro_life0</td><td>シロウ</td><td>NG:AI自動量産</td><td style="color:var(--red)">Threads×AI完全自動化セミナー商法。97%自動運用中と謳うが中身はテンプレ量産。セミナー誘導パターン</td></tr><tr><td>@shota7180</td><td>shota</td><td>NG:中身スカスカ</td><td style="color:var(--red)">肩書き権威付け+中身は一般論のプロンプト○選リスト。具体的実演・検証なし</td></tr><tr><td>@tNs76aIo7R54469</td><td>月曜日が嘘をついた</td><td>NG:煽りインフル</td><td style="color:var(--red)">これ知らないと本当に損!系。生産性爆上がり煽り。具体性ゼロ</td></tr><tr><td>@yume_ai123</td><td>ゆめ｜AIクリエイター</td><td>NG:AI副業煽り</td><td style="color:var(--red)">ChatGPTだけで月500万。文章9割AI生成で自動収益化。現実離れ</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>X トップ投稿</h3><span class="sec-tag">10件</span></div>
+      <div class="tw"><table><thead><tr><th>ハンドル</th><th>フォロワー</th><th>日付</th><th>トピック</th><th>Views</th><th>Likes</th><th>RT</th><th>BM</th></tr></thead><tbody><tr><td>@usutaku_channel</td><td>50,000</td><td>2025-06-06</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="就活×ChatGPT">就活×ChatGPT</td><td>1,500,000</td><td>13,592</td><td>2500</td><td>5000</td></tr><tr><td>@SuguruKun_ai</td><td>80,000</td><td>2026-02-20</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Gemini活用ガイド">Gemini活用ガイド</td><td>500,000</td><td>5,792</td><td>1200</td><td>3000</td></tr><tr><td>@masahirochaen</td><td>15,000</td><td>2026-03-15</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="要件定義テンプレ">要件定義テンプレ</td><td>440,455</td><td>2,531</td><td>231</td><td>3820</td></tr><tr><td>@DeNA_fullswing</td><td>30,000</td><td>2026-03-15</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業AI活用100本ノック">企業AI活用100本ノック</td><td>400,000</td><td>3,500</td><td>700</td><td>2000</td></tr><tr><td>@SuguruKun_ai</td><td>80,000</td><td>2026-03-01</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="職種別AI活用">職種別AI活用</td><td>350,000</td><td>3,779</td><td>800</td><td>2000</td></tr><tr><td>@SuguruKun_ai</td><td>80,000</td><td>2026-03-15</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="DeNA AI活用事例">DeNA AI活用事例</td><td>300,000</td><td>2,500</td><td>600</td><td>1500</td></tr><tr><td>@career_koumei</td><td>30,000</td><td>2025-12-15</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="転職×ChatGPT">転職×ChatGPT</td><td>120,000</td><td>815</td><td>150</td><td>400</td></tr><tr><td>@nezumi_uranai</td><td>15,000</td><td>2026-02-18</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Claude Code自動操作">Claude Code自動操作</td><td>95,000</td><td>580</td><td>110</td><td>250</td></tr><tr><td>@kaede_gpt</td><td>25,000</td><td>2026-03-10</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI1日自動化">AI1日自動化</td><td>80,000</td><td>450</td><td>90</td><td>300</td></tr><tr><td>@CyberAgent_PR</td><td>50,000</td><td>2026-03-07</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="生成AI利用率調査">生成AI利用率調査</td><td>60,000</td><td>180</td><td>45</td><td>80</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>note ベンチマーク</h3><span class="sec-tag">13件</span></div>
+      <div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th><th>フォーク方向</th><th>C×P×T</th></tr></thead><tbody><tr><td>fladdict</td><td>深津貴之</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="プロンプト設計の原理原則。技術的だがフレームワーク提示型で再利用性◎">プロンプト設計の原理原則。技術的だがフレームワーク提示型で再利用性◎</td><td></td></tr><tr><td>fujitsu_pr</td><td>富士通 広報note</td><td>企業AI導入</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="大企業AI導入のケーススタディ。数値をフォークして個人解釈を加える">大企業AI導入のケーススタディ。数値をフォークして個人解釈を加える</td><td></td></tr><tr><td>fumin_genai</td><td>フーミン</td><td>生成AIメンター</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="有名人の思考再現実験。エンタメ×実用のハイブリッド">有名人の思考再現実験。エンタメ×実用のハイブリッド</td><td></td></tr><tr><td>hip_tiger5987</td><td>グイグイ</td><td>AI実務×資格</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="資格×実務の掛け合わせ。G検定・DX検定のレビュー型">資格×実務の掛け合わせ。G検定・DX検定のレビュー型</td><td></td></tr><tr><td>horiday018</td><td>堀内亮平</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="技術→プロダクトの実例。概念を実サービスまで落とした説得力">技術→プロダクトの実例。概念を実サービスまで落とした説得力</td><td></td></tr><tr><td>miraisya</td><td>miraisya</td><td>AI入門</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="入門ガイド型。ミサキ層が最初に読む記事のベンチマーク">入門ガイド型。ミサキ層が最初に読む記事のベンチマーク</td><td></td></tr><tr><td>mizuhiki_kaka</td><td>花果</td><td>マーケ×AI</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="マーケ実務×AI。ミサキ層（マーケ職）に直接刺さるテーマ">マーケ実務×AI。ミサキ層（マーケ職）に直接刺さるテーマ</td><td></td></tr><tr><td>pocketstudio</td><td>ぬるぽん</td><td>企業→個人翻訳</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業事例の個人翻訳型。1行解釈">企業事例の個人翻訳型。1行解釈</td><td></td></tr><tr><td>sasuu</td><td>sasuu</td><td>非エンジニアAI活用</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="失敗込みの実験レポート。驚き屋の対極">失敗込みの実験レポート。驚き屋の対極</td><td></td></tr><tr><td>shimasan_dx</td><td>しまさん</td><td>DX×リスキリング</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="非IT出身のリスキリング型。ミサキ層に近い目線">非IT出身のリスキリング型。ミサキ層に近い目線</td><td></td></tr><tr><td>smartbankinc</td><td>SmartBank</td><td>企業AI活用</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業AI実装の網羅型。108事例からミサキ層の業務に当てはまるものを抜き出して噛み砕く">企業AI実装の網羅型。108事例からミサキ層の業務に当てはまるものを抜き出して噛み砕く</td><td></td></tr><tr><td>takanashi_ai</td><td>高梨洋平</td><td>AI比較ランキング</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI比較ランキング型。定期更新でリピーター獲得">AI比較ランキング型。定期更新でリピーター獲得</td><td></td></tr><tr><td>yusuke_motoyama</td><td>もとやま</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="論文→実験→検証の型。指示出し力の概念はミサキ層にも転用できる">論文→実験→検証の型。指示出し力の概念はミサキ層にも転用できる</td><td></td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>note NG分析</h3><span class="sec-tag">10件</span></div>
+      <div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th><th>NG理由</th></tr></thead><tbody><tr><td>750_rs</td><td>ぼっちGPT</td><td>AI量産</td><td style="color:var(--red)">コピペ型量産</td></tr><tr><td>ai_freak</td><td>AI FREAK</td><td>AI副業</td><td style="color:var(--red)">ツール紹介の体裁だが実質マネタイズ誘導</td></tr><tr><td>aicolumnwriter</td><td>アトカ</td><td>AI副業</td><td style="color:var(--red)">AI×有料note量産ファネル</td></tr><tr><td>alive_drake3207</td><td>もい</td><td>AI副業ライター</td><td style="color:var(--red)">プロンプトの良し悪しが9割。テンプレ販売型</td></tr><tr><td>astha_hr</td><td>ヒロ</td><td>AI量産</td><td style="color:var(--red)">AI量産×販売の手法開示</td></tr><tr><td>chatgpt_hitori</td><td>ひとり</td><td>AI副業</td><td style="color:var(--red)">初心者でもできたFOMO煽り</td></tr><tr><td>happy_mimosa626</td><td>ChatGペン太</td><td>AI量産</td><td style="color:var(--red)">煽りタイトル。AI量産</td></tr><tr><td>kotobashira</td><td>そうた</td><td>AI副業</td><td style="color:var(--red)">AI活用ノウハウが最強ジャンルと煽る</td></tr><tr><td>ma_hack_online</td><td>ゆーま</td><td>LINE副業</td><td style="color:var(--red)">LINE誘導+有料note販売。情報商材ファネル</td></tr><tr><td>ojigishinaineko</td><td>おじぎしないねこ</td><td>AIマネタイズ</td><td style="color:var(--red)">AI活用ではなくマネタイズが目的。煽り型</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>note ニュース</h3><span class="sec-tag">5件</span></div><div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th></tr></thead><tbody><tr><td>dx_labo</td><td>DX研究所</td><td>DX事例</td></tr><tr><td>gen_ai</td><td>生成AI事例集（note公式）</td><td>公式キュレーション</td></tr><tr><td>info</td><td>note公式</td><td>プラットフォーム動向</td></tr><tr><td>miraikyoso</td><td>未来共創コミュニティ</td><td>AI導入事例</td></tr><tr><td>notemagazine</td><td>noteマガジン（公式）</td><td>公式キュレーション</td></tr></tbody></table></div></div>
   </div>
 </div>
 <div class="page" id="page-i-trend">
   <div class="page-head"><h2>トレンド観測</h2><p>ジャンル全体の話題・フォーマット動向とネタ候補</p></div>
   <div class="page-body">
-    <div class="sec"><div class="sec-head"><h3>トレンドレポート</h3><span class="sec-tag">1件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span class="item-tag">{'from': '2026-03-05', 'to': '2026-03-12'}</span><span class="item-tag">?</span></div></div></div>
-    <div class="sec"><div class="sec-head"><h3>アイデアストック</h3><span class="sec-tag">1件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span style="color:var(--green)">new</span> | trend</div></div></div>
+    <div class="sec"><div class="sec-head"><h3>トレンドレポート</h3><span class="sec-tag">2件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span class="item-tag">{'from': '2026-03-05', 'to': '2026-03-12'}</span><span class="item-tag">?</span></div></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span class="item-tag">{'from': '2026-02-14', 'to': '2026-03-16'}</span><span class="item-tag">?</span></div></div></div>
+    <div class="sec"><div class="sec-head"><h3>アイデアストック</h3><span class="sec-tag">2件</span></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span style="color:var(--green)">new</span> | trend</div></div><div class="item-card"><div class="item-title">?</div><div class="item-meta"><span style="color:var(--green)">new</span> | trend</div></div></div>
   </div>
 </div>
 <div class="page" id="page-i-algorithm">
@@ -279,7 +304,7 @@ tr:hover td { background:rgba(99,102,241,0.03); }
 <div class="page" id="page-i-system">
   <div class="page-head"><h2>システム管理</h2><p>タスク実行・エラー・ナレッジ更新の追跡</p></div>
   <div class="page-body">
-    <div class="sec"><div class="sec-head"><h3>タスク実行ログ</h3></div><div class="tw"><table><thead><tr><th>タスク</th><th>日時</th><th>状態</th><th>所要時間</th></tr></thead><tbody><tr><td>dashboard-generate</td><td>2026-03-12T15:23:30</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>algorithm-monitor-check</td><td>2026-03-12T15:24:19</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr></tbody></table></div></div>
+    <div class="sec"><div class="sec-head"><h3>タスク実行ログ</h3></div><div class="tw"><table><thead><tr><th>タスク</th><th>日時</th><th>状態</th><th>所要時間</th></tr></thead><tbody><tr><td>dashboard-generate</td><td>2026-03-16T18:10:57</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:11:02</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:31:56</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:40:59</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:42:31</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:43:49</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:46:19</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:51:37</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:53:27</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr><tr><td>dashboard-generate</td><td>2026-03-16T18:58:35</td><td><span class="bdg bdg-posted">success</span></td><td>0.0秒</td></tr></tbody></table></div></div>
     <div class="sec"><div class="sec-head"><h3>エラーログ</h3></div><div class="empty"><div class="empty-icon">&#10003;</div><div class="empty-title">エラーなし</div></div></div>
     <div class="sec"><div class="sec-head"><h3>ナレッジ更新履歴</h3><span class="sec-tag">Git 連動</span></div>
       <div class="empty"><div class="empty-icon">&#128218;</div><div class="empty-title">将来実装</div><div class="empty-desc">git log -- knowledge/ から自動取得予定。</div></div>
@@ -291,14 +316,14 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="page-head"><h2>X 概況</h2><p>2026-03 — 主要 KPI とハイライト</p></div>
   <div class="page-body">
     <div class="kpi-row">
-      <div class="kpi"><div class="kpi-label">投稿数</div><div class="kpi-val" style="color:var(--accent)">3</div><div class="kpi-sub">当月</div></div>
-      <div class="kpi"><div class="kpi-label">インプレッション</div><div class="kpi-val">0</div></div>
-      <div class="kpi"><div class="kpi-label">エンゲージメント</div><div class="kpi-val">0</div></div>
-      <div class="kpi"><div class="kpi-label">平均 ER</div><div class="kpi-val" style="color:var(--green)">0.0%</div></div>
+      <div class="kpi"><div class="kpi-label">投稿数</div><div class="kpi-val" style="color:var(--accent)">14</div><div class="kpi-sub">当月</div></div>
+      <div class="kpi"><div class="kpi-label">インプレッション</div><div class="kpi-val">436</div></div>
+      <div class="kpi"><div class="kpi-label">エンゲージメント</div><div class="kpi-val">33</div></div>
+      <div class="kpi"><div class="kpi-label">平均 ER</div><div class="kpi-val" style="color:var(--green)">8.33%</div></div>
       <div class="kpi"><div class="kpi-label">リプライ</div><div class="kpi-val" style="color:var(--blue)">0</div></div>
       <div class="kpi"><div class="kpi-label">ブックマーク</div><div class="kpi-val">0</div></div>
       <div class="kpi"><div class="kpi-label">RT</div><div class="kpi-val">0</div></div>
-      <div class="kpi"><div class="kpi-label">いいね</div><div class="kpi-val" style="color:var(--pink)">0</div></div>
+      <div class="kpi"><div class="kpi-label">いいね</div><div class="kpi-val" style="color:var(--pink)">1</div></div>
     </div>
     <div class="ch-grid">
       <div class="ch-box"><h4>パターン別スコア</h4><canvas id="c-xo-pattern"></canvas></div>
@@ -310,8 +335,28 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="page-head"><h2>パターン分析</h2><p>10パターンの効果比較</p></div>
   <div class="page-body">
     <div class="ch-box" style="margin-bottom:16px"><h4>パターン別スコア（棒: スコア / 線: 使用回数）</h4><canvas id="c-xp-bar"></canvas></div>
-    <div class="sec"><div class="sec-head"><h3>パターン一覧</h3><span class="sec-tag">3種</span></div>
-      <div class="tw"><table><thead><tr><th>パターン</th><th>ランク</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>aruaru-kakeai</td><td><span class="bdg bdg-b">B</span></td><td>1</td><td>0.5</td></tr><tr><td>gachi-thread</td><td><span class="bdg bdg-c">C</span></td><td>1</td><td>0.5</td></tr><tr><td>sankagata-odai</td><td><span class="bdg bdg-s">S</span></td><td>1</td><td>0.5</td></tr></tbody></table></div>
+    <div class="sec"><div class="sec-head"><h3>パターン一覧</h3><span class="sec-tag">8種</span></div>
+      <div class="tw"><table><thead><tr><th>パターン</th><th>ランク</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>note連動</td><td><span class="bdg bdg-c">?</span></td><td>3</td><td>0.0394</td></tr><tr><td>trend-sokuhou</td><td><span class="bdg bdg-c">C</span></td><td>1</td><td>0.4</td></tr><tr><td>共感+図解</td><td><span class="bdg bdg-c">?</span></td><td>1</td><td>0.1075</td></tr><tr><td>共感系</td><td><span class="bdg bdg-c">?</span></td><td>1</td><td>0.0</td></tr><tr><td>参加型お題</td><td><span class="bdg bdg-c">?</span></td><td>2</td><td>0.0</td></tr><tr><td>図解</td><td><span class="bdg bdg-c">?</span></td><td>2</td><td>0.3639</td></tr><tr><td>朝tips</td><td><span class="bdg bdg-c">?</span></td><td>3</td><td>0.0</td></tr><tr><td>裏側公開</td><td><span class="bdg bdg-c">?</span></td><td>1</td><td>0.0886</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-content-type">
+  <div class="page-head"><h2>コンテンツ種別</h2><p>C軸（記事の種類）とネタ元ごとのパフォーマンス</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">C種別数</div><div class="kpi-val" style="color:var(--accent)">5</div></div>
+      <div class="kpi"><div class="kpi-label">最高スコア</div><div class="kpi-val" style="color:var(--green)">C2</div><div class="kpi-sub">ノウハウ (0.4)</div></div>
+      <div class="kpi"><div class="kpi-label">ネタ元数</div><div class="kpi-val">3</div></div>
+    </div>
+    <div class="ch-grid">
+      <div class="ch-box"><h4>C種別スコア（棒: スコア / 線: 回数）</h4><canvas id="c-xct-bar"></canvas></div>
+      <div class="ch-box"><h4>ネタ元別スコア</h4><canvas id="c-xsrc-bar"></canvas></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>C種別一覧</h3><span class="sec-tag">5種</span></div>
+      <div class="tw"><table><thead><tr><th>種別</th><th>名称</th><th>投稿数</th><th>平均スコア</th><th>平均ER</th><th>平均IMP</th></tr></thead><tbody><tr><td>C1</td><td>ツール紹介</td><td>2</td><td>0.0</td><td>0%</td><td>18</td></tr><tr><td>C2</td><td>ノウハウ</td><td>1</td><td>0.4</td><td>23.75%</td><td>80</td></tr><tr><td>C3</td><td>ニュース</td><td>3</td><td>0.0394</td><td>3.51%</td><td>44</td></tr><tr><td>C4</td><td>体験</td><td>1</td><td>0.0886</td><td>5.26%</td><td>19</td></tr><tr><td>C6</td><td>比較</td><td>7</td><td>0.1193</td><td>6.98%</td><td>24</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>ネタ元一覧</h3><span class="sec-tag">3種</span></div>
+      <div class="tw"><table><thead><tr><th>ネタ元</th><th>投稿数</th><th>平均スコア</th><th>平均ER</th></tr></thead><tbody><tr><td>Xトレンド</td><td>1</td><td>0.4</td><td>23.75%</td></tr><tr><td>note連動</td><td>3</td><td>0.0394</td><td>3.51%</td></tr><tr><td>オリジナル</td><td>10</td><td>0.0924</td><td>6.41%</td></tr></tbody></table></div>
     </div>
   </div>
 </div>
@@ -324,7 +369,7 @@ tr:hover td { background:rgba(99,102,241,0.03); }
     </div>
     <div class="ch-box" style="margin-bottom:16px"><h4>難易度分布</h4><canvas id="c-xpil-diff"></canvas></div>
     <div class="sec"><div class="sec-head"><h3>柱別データ</h3></div>
-      <div class="tw"><table><thead><tr><th>柱</th><th>投稿数</th><th>比率</th><th>平均スコア</th></tr></thead><tbody><tr><td>やってみた実演</td><td>2</td><td>67%</td><td>0.5</td></tr><tr><td>埋もれた一次情報のフォーク</td><td>0</td><td>0%</td><td>0</td></tr><tr><td>制作の裏側公開</td><td>1</td><td>33%</td><td>0.5</td></tr></tbody></table></div>
+      <div class="tw"><table><thead><tr><th>柱</th><th>投稿数</th><th>比率</th><th>平均スコア</th></tr></thead><tbody><tr><td>やってみた実演</td><td>9</td><td>64%</td><td>0.0928</td></tr><tr><td>埋もれた一次情報のフォーク</td><td>4</td><td>29%</td><td>0.1296</td></tr><tr><td>制作の裏側公開</td><td>1</td><td>7%</td><td>0.0886</td></tr></tbody></table></div>
     </div>
   </div>
 </div>
@@ -332,16 +377,76 @@ tr:hover td { background:rgba(99,102,241,0.03); }
   <div class="page-head"><h2>曜日×時間帯</h2><p>エンゲージメントのタイミング分析</p></div>
   <div class="page-body">
     <div class="sec"><div class="sec-head"><h3>ヒートマップ</h3><span class="sec-tag">ER%</span></div><div id="x-heatmap"></div></div>
+    <div class="ch-box" style="margin-bottom:16px"><h4>投稿枠別 平均ER</h4><canvas id="c-xts-slot"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>投稿枠別データ</h3><span class="sec-tag">3枠</span></div>
+      <div class="tw"><table><thead><tr><th>枠</th><th>投稿数</th><th>平均ER</th><th>平均IMP</th></tr></thead><tbody><tr><td>夜</td><td>4</td><td>4.06%</td><td>29</td></tr><tr><td>昼</td><td>7</td><td>10.47%</td><td>40</td></tr><tr><td>朝</td><td>3</td><td>0%</td><td>12</td></tr></tbody></table></div>
+    </div>
   </div>
 </div>
 <div class="page" id="page-x-images">
   <div class="page-head"><h2>画像分析</h2><p>画像タイプ別スコアと品質問題</p></div>
   <div class="page-body">
     <div class="ch-box" style="margin-bottom:16px"><h4>画像タイプ別スコア</h4><canvas id="c-ximg-bar"></canvas></div>
-    <div class="sec"><div class="sec-head"><h3>画像タイプ一覧</h3><span class="sec-tag">1種</span></div>
-      <div class="tw"><table><thead><tr><th>タイプ</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>diagram</td><td>3</td><td>0.5</td></tr></tbody></table></div>
+    <div class="sec"><div class="sec-head"><h3>画像タイプ一覧</h3><span class="sec-tag">4種</span></div>
+      <div class="tw"><table><thead><tr><th>タイプ</th><th>使用回数</th><th>平均スコア</th></tr></thead><tbody><tr><td>blackboard</td><td>1</td><td>0.0481</td></tr><tr><td>diagram</td><td>7</td><td>0.1891</td></tr><tr><td>none</td><td>4</td><td>0.0</td></tr><tr><td>ogp</td><td>2</td><td>0.0351</td></tr></tbody></table></div>
     </div>
-    <div class="sec"><div class="sec-head"><h3>画像品質問題</h3><span class="sec-tag">1件</span></div><div class="issue-item"><span class="issue-id">2026-03-16_月</span>キャラ被り発生（generate_image.py修正前の画像）</div></div>
+    <div class="sec"><div class="sec-head"><h3>画像品質問題</h3><span class="sec-tag">0件</span></div><div class="empty"><div class="empty-icon">&#10003;</div><div class="empty-title">問題なし</div></div></div>
+  </div>
+</div>
+<div class="page" id="page-x-note-link">
+  <div class="page-head"><h2>note連動</h2><p>note記事と連動した投稿のパフォーマンス分析</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">連動投稿数</div><div class="kpi-val" style="color:var(--accent)">2</div></div>
+      <div class="kpi"><div class="kpi-label">非連動投稿数</div><div class="kpi-val">12</div></div>
+      <div class="kpi"><div class="kpi-label">連動時 平均IMP</div><div class="kpi-val" style="color:var(--green)">59</div></div>
+      <div class="kpi"><div class="kpi-label">非連動 平均IMP</div><div class="kpi-val">26</div></div>
+    </div>
+    <div class="ch-box" style="margin-bottom:16px"><h4>note連動 有無別パフォーマンス比較</h4><canvas id="c-xnl-bar"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>note連動投稿一覧</h3><span class="sec-tag">2件</span></div>
+      <div class="tw"><table><thead><tr><th>日付</th><th>トピック</th><th>IMP</th><th>プロフ遷移</th><th>リンクClick</th><th>ER</th></tr></thead><tbody><tr><td>2026-03-14</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">AI補助金450万円</td><td>70</td><td>0</td><td>2</td><td>2.86%</td></tr><tr><td>2026-03-14</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ChatGPT History note連動</td><td>48</td><td>0</td><td>2</td><td>4.17%</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>プロフィール遷移の比較</h3></div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">連動時 プロフ遷移</div><div class="kpi-val" style="color:var(--blue)">0</div></div>
+        <div class="kpi"><div class="kpi-label">非連動 プロフ遷移</div><div class="kpi-val">0.1</div></div>
+        <div class="kpi"><div class="kpi-label">連動時 リンクClick</div><div class="kpi-val" style="color:var(--teal)">2</div></div>
+        <div class="kpi"><div class="kpi-label">非連動 リンクClick</div><div class="kpi-val">0.4</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-cross">
+  <div class="page-head"><h2>クロス分析</h2><p>C種別×パターンの組み合わせ別パフォーマンス — どの掛け算が効くか</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">組み合わせ数</div><div class="kpi-val" style="color:var(--accent)">9</div></div>
+      <div class="kpi"><div class="kpi-label">最強の組み合わせ</div><div class="kpi-val" style="color:var(--green);font-size:1rem">C2×trend-sokuhou</div><div class="kpi-sub">スコア 0.4</div></div>
+      <div class="kpi"><div class="kpi-label">改善候補</div><div class="kpi-val" style="color:var(--red);font-size:1rem">C6×朝tips</div><div class="kpi-sub">スコア 0.0</div></div>
+    </div>
+    <div class="ch-box" style="margin-bottom:16px"><h4>組み合わせ別スコア</h4><canvas id="c-xcross-bar"></canvas></div>
+    <div class="sec"><div class="sec-head"><h3>C種別×パターン一覧</h3><span class="sec-tag">9組</span></div>
+      <div class="tw"><table><thead><tr><th>C種別</th><th>名称</th><th>パターン</th><th>投稿数</th><th>平均スコア</th><th>平均ER</th><th>平均IMP</th></tr></thead><tbody><tr><td>C2</td><td>ノウハウ</td><td>trend-sokuhou</td><td>1</td><td style="color:var(--text);font-weight:600">0.4</td><td>23.75%</td><td>80</td></tr><tr><td>C6</td><td>比較</td><td>図解</td><td>2</td><td style="color:var(--text);font-weight:600">0.3639</td><td>7.59%</td><td>44</td></tr><tr><td>C6</td><td>比較</td><td>共感+図解</td><td>1</td><td style="color:var(--red);font-weight:600">0.1075</td><td>6.38%</td><td>47</td></tr><tr><td>C4</td><td>体験</td><td>裏側公開</td><td>1</td><td style="color:var(--red);font-weight:600">0.0886</td><td>5.26%</td><td>19</td></tr><tr><td>C3</td><td>ニュース</td><td>note連動</td><td>3</td><td style="color:var(--red);font-weight:600">0.0394</td><td>3.51%</td><td>44</td></tr><tr><td>C1</td><td>ツール紹介</td><td>朝tips</td><td>2</td><td style="color:var(--red);font-weight:600">0.0</td><td>0%</td><td>18</td></tr><tr><td>C6</td><td>比較</td><td>参加型お題</td><td>2</td><td style="color:var(--red);font-weight:600">0.0</td><td>0%</td><td>8</td></tr><tr><td>C6</td><td>比較</td><td>共感系</td><td>1</td><td style="color:var(--red);font-weight:600">0.0</td><td>0%</td><td>14</td></tr><tr><td>C6</td><td>比較</td><td>朝tips</td><td>1</td><td style="color:var(--red);font-weight:600">0.0</td><td>0%</td><td>3</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-x-improve">
+  <div class="page-head"><h2>改善分析</h2><p>低パフォーマンス投稿の特定と次のアクション</p></div>
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">ER=0%の投稿</div><div class="kpi-val" style="color:var(--red)">5</div><div class="kpi-sub">改善余地あり</div></div>
+      <div class="kpi"><div class="kpi-label">未使用C種別</div><div class="kpi-val" style="color:var(--blue)">3</div><div class="kpi-sub">/ 8種中</div></div>
+      <div class="kpi"><div class="kpi-label">偏り警告</div><div class="kpi-val" style="color:var(--red)">1</div></div>
+    </div>
+    <div style="background:rgba(184,90,58,0.08);border:1px solid var(--red);border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:0.82rem;color:var(--red)">⚠ C6（比較）が全体の50%を占めています。他のC種別を試しましょう</div>
+    <div class="sec"><div class="sec-head"><h3>スコア下位5投稿</h3><span class="sec-tag">要分析</span></div>
+      <div class="tw"><table><thead><tr><th>日付</th><th>C種別</th><th>パターン</th><th>トピック</th><th>IMP</th><th>ER</th><th>スコア</th><th>枠</th><th>画像</th></tr></thead><tbody><tr><td>2026-03-14</td><td>C1</td><td>朝tips</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">メール下書きtips</td><td>12</td><td style="color:var(--red)">0.0%</td><td style="font-weight:600">0.0</td><td>朝</td><td>none</td></tr><tr><td>2026-03-14</td><td>C6</td><td>参加型お題</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">土曜のお題</td><td>14</td><td style="color:var(--red)">0.0%</td><td style="font-weight:600">0.0</td><td>夜</td><td>none</td></tr><tr><td>2026-03-15</td><td>C1</td><td>朝tips</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">月曜の会議準備</td><td>24</td><td style="color:var(--red)">0.0%</td><td style="font-weight:600">0.0</td><td>朝</td><td>none</td></tr><tr><td>2026-03-15</td><td>C6</td><td>図解</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">AIへの指示3つのコツ</td><td>10</td><td style="color:var(--red)">0.0%</td><td style="font-weight:600">0.0</td><td>昼</td><td>diagram</td></tr><tr><td>2026-03-15</td><td>C3</td><td>note連動</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Gemini Flash note連動</td><td>15</td><td style="color:var(--red)">0.0%</td><td style="font-weight:600">0.0</td><td>昼</td><td>ogp</td></tr></tbody></table></div>
+    </div>
+    
+    <div class="sec"><div class="sec-head"><h3>未使用のC種別</h3><span class="sec-tag">3種</span></div>
+      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:8px">まだ試していないコンテンツ種別。新しい切り口として検討できます。</p>
+      <div><span style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 10px;margin:3px;font-size:0.78rem">C5（用語）</span> <span style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 10px;margin:3px;font-size:0.78rem">C7（オピニオン）</span> <span style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 10px;margin:3px;font-size:0.78rem">C8（トレンド分析）</span></div>
+    </div>
   </div>
 </div>
 <div class="page" id="page-x-posts">
@@ -352,7 +457,8 @@ tr:hover td { background:rgba(99,102,241,0.03); }
         <table id="x-tbl">
           <thead><tr>
             <th data-sort="str">日付<span class="sa"></span></th>
-            <th data-sort="str">曜日<span class="sa"></span></th>
+            <th data-sort="str">枠<span class="sa"></span></th>
+            <th data-sort="str">C種別<span class="sa"></span></th>
             <th data-sort="str">パターン<span class="sa"></span></th>
             <th data-sort="str">ランク<span class="sa"></span></th>
             <th data-sort="str">柱<span class="sa"></span></th>
@@ -366,6 +472,10 @@ tr:hover td { background:rgba(99,102,241,0.03); }
             <th data-sort="num">BM<span class="sa"></span></th>
             <th data-sort="num">スコア<span class="sa"></span></th>
             <th data-sort="str">画像<span class="sa"></span></th>
+            <th data-sort="str">ネタ元<span class="sa"></span></th>
+            <th data-sort="num">文字数<span class="sa"></span></th>
+            <th data-sort="str">note<span class="sa"></span></th>
+            <th data-sort="str">本文<span class="sa"></span></th>
           </tr></thead>
           <tbody id="x-tbl-body"></tbody>
         </table>
@@ -375,21 +485,30 @@ tr:hover td { background:rgba(99,102,241,0.03); }
 </div>
     
 <div class="page" id="page-n-overview">
-  <div class="page-head"><h2>note 概況</h2><p>2026-03 — 記事パフォーマンス</p></div>
+  <div class="page-head"><h2>note 概況</h2><p>2026-03 — 記事パフォーマンス + 競合概況</p></div>
   <div class="page-body">
     <div class="kpi-row">
       <div class="kpi"><div class="kpi-label">記事数</div><div class="kpi-val" style="color:var(--accent)">0</div></div>
       <div class="kpi"><div class="kpi-label">PV</div><div class="kpi-val">0</div></div>
       <div class="kpi"><div class="kpi-label">スキ</div><div class="kpi-val" style="color:var(--green)">0</div></div>
       <div class="kpi"><div class="kpi-label">コメント</div><div class="kpi-val" style="color:var(--blue)">0</div></div>
+      <div class="kpi"><div class="kpi-label">競合 benchmark</div><div class="kpi-val" style="color:var(--green)">13</div></div><div class="kpi"><div class="kpi-label">競合 ng</div><div class="kpi-val" style="color:var(--red)">10</div></div><div class="kpi"><div class="kpi-label">競合 news</div><div class="kpi-val" style="color:var(--blue)">5</div></div>
     </div>
-    <div class="empty"><div class="empty-icon">&#128221;</div><div class="empty-title">記事データ未収集</div>
-    <div class="empty-desc">note-dashboard-report タスクを実行してデータを収集してください。</div></div>
+    <div class="empty"><div class="empty-icon">&#128221;</div><div class="empty-title">自記事データ未収集</div>
+    <div class="empty-desc">note_analytics.py 構築後にデータを収集してください。</div></div>
   </div>
 </div>
 <div class="page" id="page-n-articles">
-  <div class="page-head"><h2>記事一覧</h2><p>全記事の PV・スキ・コメント</p></div>
-  <div class="page-body"><div class="empty"><div class="empty-icon">&#9776;</div><div class="empty-title">データ蓄積後に表示</div></div></div>
+  <div class="page-head"><h2>競合アカウント</h2><p>note 競合 28件の追跡状況</p></div>
+  <div class="page-body">
+    <div class="sec"><div class="sec-head"><h3>ベンチマーク</h3><span class="sec-tag">13件</span></div>
+      <div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th><th>フォーク方向</th><th>C×P×T</th></tr></thead><tbody><tr><td>fladdict</td><td>深津貴之</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="プロンプト設計の原理原則。技術的だがフレームワーク提示型で再利用性◎">プロンプト設計の原理原則。技術的だがフレームワーク提示型で再利用性◎</td><td></td></tr><tr><td>fujitsu_pr</td><td>富士通 広報note</td><td>企業AI導入</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="大企業AI導入のケーススタディ。数値をフォークして個人解釈を加える">大企業AI導入のケーススタディ。数値をフォークして個人解釈を加える</td><td></td></tr><tr><td>fumin_genai</td><td>フーミン</td><td>生成AIメンター</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="有名人の思考再現実験。エンタメ×実用のハイブリッド">有名人の思考再現実験。エンタメ×実用のハイブリッド</td><td></td></tr><tr><td>hip_tiger5987</td><td>グイグイ</td><td>AI実務×資格</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="資格×実務の掛け合わせ。G検定・DX検定のレビュー型">資格×実務の掛け合わせ。G検定・DX検定のレビュー型</td><td></td></tr><tr><td>horiday018</td><td>堀内亮平</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="技術→プロダクトの実例。概念を実サービスまで落とした説得力">技術→プロダクトの実例。概念を実サービスまで落とした説得力</td><td></td></tr><tr><td>miraisya</td><td>miraisya</td><td>AI入門</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="入門ガイド型。ミサキ層が最初に読む記事のベンチマーク">入門ガイド型。ミサキ層が最初に読む記事のベンチマーク</td><td></td></tr><tr><td>mizuhiki_kaka</td><td>花果</td><td>マーケ×AI</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="マーケ実務×AI。ミサキ層（マーケ職）に直接刺さるテーマ">マーケ実務×AI。ミサキ層（マーケ職）に直接刺さるテーマ</td><td></td></tr><tr><td>pocketstudio</td><td>ぬるぽん</td><td>企業→個人翻訳</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業事例の個人翻訳型。1行解釈">企業事例の個人翻訳型。1行解釈</td><td></td></tr><tr><td>sasuu</td><td>sasuu</td><td>非エンジニアAI活用</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="失敗込みの実験レポート。驚き屋の対極">失敗込みの実験レポート。驚き屋の対極</td><td></td></tr><tr><td>shimasan_dx</td><td>しまさん</td><td>DX×リスキリング</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="非IT出身のリスキリング型。ミサキ層に近い目線">非IT出身のリスキリング型。ミサキ層に近い目線</td><td></td></tr><tr><td>smartbankinc</td><td>SmartBank</td><td>企業AI活用</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="企業AI実装の網羅型。108事例からミサキ層の業務に当てはまるものを抜き出して噛み砕く">企業AI実装の網羅型。108事例からミサキ層の業務に当てはまるものを抜き出して噛み砕く</td><td></td></tr><tr><td>takanashi_ai</td><td>高梨洋平</td><td>AI比較ランキング</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="AI比較ランキング型。定期更新でリピーター獲得">AI比較ランキング型。定期更新でリピーター獲得</td><td></td></tr><tr><td>yusuke_motoyama</td><td>もとやま</td><td>プロンプト技術</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="論文→実験→検証の型。指示出し力の概念はミサキ層にも転用できる">論文→実験→検証の型。指示出し力の概念はミサキ層にも転用できる</td><td></td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>NG分析</h3><span class="sec-tag">10件</span></div>
+      <div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th><th>NG理由</th></tr></thead><tbody><tr><td>750_rs</td><td>ぼっちGPT</td><td>AI量産</td><td style="color:var(--red)">コピペ型量産</td></tr><tr><td>ai_freak</td><td>AI FREAK</td><td>AI副業</td><td style="color:var(--red)">ツール紹介の体裁だが実質マネタイズ誘導</td></tr><tr><td>aicolumnwriter</td><td>アトカ</td><td>AI副業</td><td style="color:var(--red)">AI×有料note量産ファネル</td></tr><tr><td>alive_drake3207</td><td>もい</td><td>AI副業ライター</td><td style="color:var(--red)">プロンプトの良し悪しが9割。テンプレ販売型</td></tr><tr><td>astha_hr</td><td>ヒロ</td><td>AI量産</td><td style="color:var(--red)">AI量産×販売の手法開示</td></tr><tr><td>chatgpt_hitori</td><td>ひとり</td><td>AI副業</td><td style="color:var(--red)">初心者でもできたFOMO煽り</td></tr><tr><td>happy_mimosa626</td><td>ChatGペン太</td><td>AI量産</td><td style="color:var(--red)">煽りタイトル。AI量産</td></tr><tr><td>kotobashira</td><td>そうた</td><td>AI副業</td><td style="color:var(--red)">AI活用ノウハウが最強ジャンルと煽る</td></tr><tr><td>ma_hack_online</td><td>ゆーま</td><td>LINE副業</td><td style="color:var(--red)">LINE誘導+有料note販売。情報商材ファネル</td></tr><tr><td>ojigishinaineko</td><td>おじぎしないねこ</td><td>AIマネタイズ</td><td style="color:var(--red)">AI活用ではなくマネタイズが目的。煽り型</td></tr></tbody></table></div>
+    </div>
+    <div class="sec"><div class="sec-head"><h3>ニュース</h3><span class="sec-tag">5件</span></div><div class="tw"><table><thead><tr><th>アカウント</th><th>名前</th><th>カテゴリ</th></tr></thead><tbody><tr><td>dx_labo</td><td>DX研究所</td><td>DX事例</td></tr><tr><td>gen_ai</td><td>生成AI事例集（note公式）</td><td>公式キュレーション</td></tr><tr><td>info</td><td>note公式</td><td>プラットフォーム動向</td></tr><tr><td>miraikyoso</td><td>未来共創コミュニティ</td><td>AI導入事例</td></tr><tr><td>notemagazine</td><td>noteマガジン（公式）</td><td>公式キュレーション</td></tr></tbody></table></div></div>
+  </div>
 </div>
 <div class="page" id="page-n-categories">
   <div class="page-head"><h2>カテゴリ別</h2><p>記事カテゴリごとの PV 比較</p></div>
@@ -457,32 +576,59 @@ function mkDonut(id, labels, data, colors) {
 }
 
 // ===== サマリー =====
-mkBar('c-sum-posts', ['X','note'], [{ label:'投稿数', data:[3, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
-mkBar('c-sum-reach', ['X','note'], [{ label:'リーチ', data:[0, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
+mkBar('c-sum-posts', ['X','note'], [{ label:'投稿数', data:[14, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
+mkBar('c-sum-reach', ['X','note'], [{ label:'リーチ', data:[436, 0], backgroundColor:['#1da1f2cc','#2dcc70cc'], borderRadius:6 }], { ...nL, scales:{ x:scX, y:scY } });
 
 // ===== X 概況 =====
-mkBar('c-xo-pattern', ["aruaru-kakeai", "gachi-thread", "sankagata-odai"], [
-  { label:'スコア', data:[0.5, 0.5, 0.5], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
-  { label:'回数', data:[1, 1, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
+mkBar('c-xo-pattern', ["note連動", "trend-sokuhou", "共感+図解", "共感系", "参加型お題", "図解", "朝tips", "裏側公開"], [
+  { label:'スコア', data:[0.0394, 0.4, 0.1075, 0.0, 0.0, 0.3639, 0.0, 0.0886], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[3, 1, 1, 1, 2, 2, 3, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
 ], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:scY, y1:scY2 } });
-mkDonut('c-xo-pillar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [2, 0, 1], C.slice(0,3));
+mkDonut('c-xo-pillar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [9, 4, 1], C.slice(0,3));
 
 // ===== X パターン =====
-mkBar('c-xp-bar', ["aruaru-kakeai", "gachi-thread", "sankagata-odai"], [
-  { label:'スコア', data:[0.5, 0.5, 0.5], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
-  { label:'回数', data:[1, 1, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
+mkBar('c-xp-bar', ["note連動", "trend-sokuhou", "共感+図解", "共感系", "参加型お題", "図解", "朝tips", "裏側公開"], [
+  { label:'スコア', data:[0.0394, 0.4, 0.1075, 0.0, 0.0, 0.3639, 0.0, 0.0886], backgroundColor:'#6366f1cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[3, 1, 1, 1, 2, 2, 3, 1], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
 ], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:{ ...scY, title:{ display:true, text:'スコア', color:'#7c809a' } }, y1:{ ...scY2, title:{ display:true, text:'回数', color:'#22c55e' } } } });
 
 // ===== X 柱 =====
-mkDonut('c-xpil-donut', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [2, 0, 1], C.slice(0,3));
-mkBar('c-xpil-bar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [{ label:'平均スコア', data:[0.5, 0.5], backgroundColor:C.slice(0,3).map(c=>c+'cc'), borderRadius:6 }], { ...nL, indexAxis:'y', scales:{ x:scY, y:{ ...scX, ticks:{ ...scX.ticks, font:{ size:9 } } } } });
-mkDonut('c-xpil-diff', ["初心者", "中級", "上級"], [2, 1, 0], ['#22c55e','#eab308','#ef4444']);
+mkDonut('c-xpil-donut', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [9, 4, 1], C.slice(0,3));
+mkBar('c-xpil-bar', ["やってみた実演", "埋もれた一次情報のフォーク", "制作の裏側公開"], [{ label:'平均スコア', data:[0.0928, 0.1296, 0.0886], backgroundColor:C.slice(0,3).map(c=>c+'cc'), borderRadius:6 }], { ...nL, indexAxis:'y', scales:{ x:scY, y:{ ...scX, ticks:{ ...scX.ticks, font:{ size:9 } } } } });
+mkDonut('c-xpil-diff', ["初心者", "中級", "上級"], [0, 14, 0], ['#22c55e','#eab308','#ef4444']);
 
 // ===== X 画像 =====
-mkBar('c-ximg-bar', ["diagram"], [
-  { label:'スコア', data:[0.5], backgroundColor:'#ec4899cc', borderRadius:4, yAxisID:'y' },
-  { label:'回数', data:[3], backgroundColor:'#14b8a644', borderRadius:4, yAxisID:'y1' }
+mkBar('c-ximg-bar', ["blackboard", "diagram", "none", "ogp"], [
+  { label:'スコア', data:[0.0481, 0.1891, 0.0, 0.0351], backgroundColor:'#ec4899cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[1, 7, 4, 2], backgroundColor:'#14b8a644', borderRadius:4, yAxisID:'y1' }
 ], { ...bO, scales:{ x:scX, y:scY, y1:{ ...scY2, ticks:{ color:'#14b8a6' } } } });
+
+// ===== X コンテンツ種別 =====
+mkBar('c-xct-bar', ["ツール紹介", "ノウハウ", "ニュース", "体験", "比較"], [
+  { label:'スコア', data:[0.0, 0.4, 0.0394, 0.0886, 0.1193], backgroundColor:'#8b5cf6cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[2, 1, 3, 1, 7], backgroundColor:'#06b6d444', borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:scY, y1:scY2 } });
+mkBar('c-xsrc-bar', ["Xトレンド", "note連動", "オリジナル"], [
+  { label:'スコア', data:[0.4, 0.0394, 0.0924], backgroundColor:'#f97316cc', borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[1, 3, 10], backgroundColor:'#22c55e44', borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:45 } }, y:scY, y1:scY2 } });
+
+// ===== X 投稿枠別 =====
+mkBar('c-xts-slot', ["夜", "昼", "朝"], [
+  { label:'平均ER%', data:[4.06, 10.47, 0], backgroundColor:C.slice(0,["夜", "昼", "朝"].length).map(c=>c+'cc'), borderRadius:6 }
+], { ...nL, scales:{ x:scX, y:{ ...scY, title:{ display:true, text:'ER%', color:'#7c809a' } } } });
+
+// ===== X note連動 =====
+mkBar('c-xnl-bar', ["連動あり", "連動なし"], [
+  { label:'平均IMP', data:[59, 26.5], backgroundColor:['#22c55ecc','#7c809acc'], borderRadius:6, yAxisID:'y' },
+  { label:'プロフ遷移', data:[0, 0.1], backgroundColor:['#3b82f6cc','#7c809a88'], borderRadius:6, yAxisID:'y1' }
+], { ...bO, scales:{ x:scX, y:scY, y1:scY2 } });
+
+// ===== X クロス分析 =====
+mkBar('c-xcross-bar', ["C2×trend-sokuhou", "C6×図解", "C6×共感+図解", "C4×裏側公開", "C3×note連動", "C1×朝tips", "C6×参加型お題", "C6×共感系", "C6×朝tips"], [
+  { label:'スコア', data:[0.4, 0.3639, 0.1075, 0.0886, 0.0394, 0.0, 0.0, 0.0, 0.0], backgroundColor:C.concat(C).slice(0,["C2×trend-sokuhou", "C6×図解", "C6×共感+図解", "C4×裏側公開", "C3×note連動", "C1×朝tips", "C6×参加型お題", "C6×共感系", "C6×朝tips"].length).map(c=>c+'cc'), borderRadius:4, yAxisID:'y' },
+  { label:'回数', data:[1, 2, 1, 1, 3, 2, 2, 1, 1], backgroundColor:C.concat(C).slice(0,["C2×trend-sokuhou", "C6×図解", "C6×共感+図解", "C4×裏側公開", "C3×note連動", "C1×朝tips", "C6×参加型お題", "C6×共感系", "C6×朝tips"].length).map(c=>c+'33'), borderRadius:4, yAxisID:'y1' }
+], { ...bO, scales:{ x:{ ...scX, ticks:{ ...scX.ticks, maxRotation:60 } }, y:scY, y1:scY2 } });
 
 // ===== アルゴリズム ER 推移 =====
 (function() {
@@ -502,7 +648,7 @@ mkBar('c-ximg-bar', ["diagram"], [
 (function() {
   const c = document.getElementById('x-heatmap');
   if (!c) return;
-  const data = [{"day": "水", "time": "11:55", "er": 0.0, "imp": 0, "rep": 0}, {"day": "金", "time": "20:00", "er": 0.0, "imp": 0, "rep": 0}, {"day": "月", "time": "20:00", "er": 0.0, "imp": 0, "rep": 0}];
+  const data = [{"day": "木", "time": "11:55", "er": 6.38, "imp": 47, "rep": 0}, {"day": "金", "time": "15:00", "er": 23.75, "imp": 80, "rep": 0}, {"day": "金", "time": "20:00", "er": 5.26, "imp": 19, "rep": 0}, {"day": "土", "time": "00:00", "er": 2.86, "imp": 70, "rep": 0}, {"day": "土", "time": "07:00", "er": 0.0, "imp": 12, "rep": 0}, {"day": "土", "time": "12:00", "er": 7.59, "imp": 79, "rep": 0}, {"day": "土", "time": "12:00", "er": 4.17, "imp": 48, "rep": 0}, {"day": "土", "time": "20:00", "er": 0.0, "imp": 14, "rep": 0}, {"day": "日", "time": "07:00", "er": 0.0, "imp": 24, "rep": 0}, {"day": "日", "time": "12:00", "er": 0.0, "imp": 10, "rep": 0}, {"day": "日", "time": "12:00", "er": 0.0, "imp": 15, "rep": 0}, {"day": "日", "time": "20:00", "er": 0.0, "imp": 14, "rep": 0}, {"day": "月", "time": "07:00", "er": 0.0, "imp": 1, "rep": 0}, {"day": "月", "time": "13:00", "er": 0.0, "imp": 3, "rep": 0}];
   if (!data.length) { c.innerHTML = '<div class="empty"><div class="empty-desc">データなし</div></div>'; return; }
   const days = ['月','火','水','木','金','土','日'];
   const g = {};
@@ -524,7 +670,7 @@ mkBar('c-ximg-bar', ["diagram"], [
 (function() {
   const tbody = document.getElementById('x-tbl-body');
   if (!tbody) return;
-  const data = [{"date": "2026-03-12", "day": "水", "pattern": "aruaru-kakeai", "pillar": "やってみた実演", "status": "posted", "topic": "AI効率化あるある（理想10分 vs 現実90分）", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}, {"date": "2026-03-13", "day": "金", "pattern": "gachi-thread", "pillar": "制作の裏側公開", "status": "scheduled", "topic": "AIがブラウザ操作して投稿してる裏側", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}, {"date": "2026-03-16", "day": "月", "pattern": "sankagata-odai", "pillar": "やってみた実演", "status": "scheduled", "topic": "AIで一番「これは助かった」って場面、なに？", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": "キャラ被り発生（generate_image.py修正前の画像）"}, {"date": "YYYY-MM-DD", "day": "月", "pattern": "xgrid-4koma", "pillar": "やってみた実演", "status": "posted", "topic": "", "impressions": 0, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": ""}];
+  const data = [{"date": "2026-03-12", "day": "木", "pattern": "共感+図解", "pillar": "やってみた実演", "status": "posted", "topic": "AI効率化あるある", "impressions": 47, "engagement_rate": 6.38, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.1075, "image_type": "diagram", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "「AIで10分で終わりました！」って投稿よく見るけど、実際はプロンプト調整に40分…", "detail_clicks": 1, "profile_visits": 0, "link_clicks": 0, "time_slot": "昼", "note_linked": "無"}, {"date": "2026-03-13", "day": "金", "pattern": "trend-sokuhou", "pillar": "埋もれた一次情報のフォーク", "status": "posted", "topic": "Claude偽サイト注意喚起", "impressions": 80, "engagement_rate": 23.75, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.4, "image_type": "diagram", "image_issues": "", "content_type": "C2", "source": "Xトレンド", "char_count": 0, "post_text": "Claude偽サイト注意喚起（正規vs偽比較）", "detail_clicks": 9, "profile_visits": 0, "link_clicks": 5, "time_slot": "昼", "note_linked": "無"}, {"date": "2026-03-13", "day": "金", "pattern": "裏側公開", "pillar": "制作の裏側公開", "status": "posted", "topic": "AIブラウザ操作裏側", "impressions": 19, "engagement_rate": 5.26, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0886, "image_type": "diagram", "image_issues": "", "content_type": "C4", "source": "オリジナル", "char_count": 0, "post_text": "この投稿、実はAIがブラウザを操作して作ってます。", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "夜", "note_linked": "無"}, {"date": "2026-03-14", "day": "土", "pattern": "note連動", "pillar": "埋もれた一次情報のフォーク", "status": "posted", "topic": "AI補助金450万円", "impressions": 70, "engagement_rate": 2.86, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0481, "image_type": "blackboard", "image_issues": "", "content_type": "C3", "source": "note連動", "char_count": 0, "post_text": "AI補助金450万円（デジタル化・AI導入補助金）", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 2, "time_slot": "夜", "note_linked": "有"}, {"date": "2026-03-14", "day": "土", "pattern": "朝tips", "pillar": "やってみた実演", "status": "posted", "topic": "メール下書きtips", "impressions": 12, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "none", "image_issues": "", "content_type": "C1", "source": "オリジナル", "char_count": 0, "post_text": "土曜の朝にやってほしいこと「来週のメール、AIに下書きさせておく」", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "朝", "note_linked": "無"}, {"date": "2026-03-14", "day": "土", "pattern": "図解", "pillar": "やってみた実演", "status": "posted", "topic": "AI4種使い分け", "impressions": 79, "engagement_rate": 7.59, "likes": 1, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.7279, "image_type": "diagram", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 3, "profile_visits": 1, "link_clicks": 0, "time_slot": "昼", "note_linked": "無"}, {"date": "2026-03-14", "day": "土", "pattern": "note連動", "pillar": "埋もれた一次情報のフォーク", "status": "posted", "topic": "ChatGPT History note連動", "impressions": 48, "engagement_rate": 4.17, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0702, "image_type": "ogp", "image_issues": "", "content_type": "C3", "source": "note連動", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 2, "time_slot": "昼", "note_linked": "有"}, {"date": "2026-03-14", "day": "土", "pattern": "参加型お題", "pillar": "やってみた実演", "status": "posted", "topic": "土曜のお題", "impressions": 14, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "none", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "夜", "note_linked": "無"}, {"date": "2026-03-15", "day": "日", "pattern": "朝tips", "pillar": "やってみた実演", "status": "posted", "topic": "月曜の会議準備", "impressions": 24, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "none", "image_issues": "", "content_type": "C1", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "朝", "note_linked": "無"}, {"date": "2026-03-15", "day": "日", "pattern": "図解", "pillar": "やってみた実演", "status": "posted", "topic": "AIへの指示3つのコツ", "impressions": 10, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "昼", "note_linked": "無"}, {"date": "2026-03-15", "day": "日", "pattern": "note連動", "pillar": "埋もれた一次情報のフォーク", "status": "posted", "topic": "Gemini Flash note連動", "impressions": 15, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "ogp", "image_issues": "", "content_type": "C3", "source": "note連動", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "昼", "note_linked": "無"}, {"date": "2026-03-15", "day": "日", "pattern": "共感系", "pillar": "やってみた実演", "status": "posted", "topic": "AI使い始め1ヶ月", "impressions": 14, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "none", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "夜", "note_linked": "無"}, {"date": "2026-03-16", "day": "月", "pattern": "参加型お題", "pillar": "やってみた実演", "status": "posted", "topic": "これは助かった参加型お題", "impressions": 1, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 0, "post_text": "", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "朝", "note_linked": "無"}, {"date": "2026-03-16", "day": "月", "pattern": "朝tips", "pillar": "やってみた実演", "status": "posted", "topic": "出力形式tips", "impressions": 3, "engagement_rate": 0.0, "likes": 0, "replies": 0, "retweets": 0, "bookmarks": 0, "composite_score": 0.0, "image_type": "diagram", "image_issues": "", "content_type": "C6", "source": "オリジナル", "char_count": 68, "post_text": "❌ 「要約して」✅ 「3行で、結論→根拠→補足の順で」AIへの指示、「出力の形式」を足すだけで精度が変わる。試した中で一番効いたのがこれ", "detail_clicks": 0, "profile_visits": 0, "link_clicks": 0, "time_slot": "昼", "note_linked": "無"}];
   const rm = {"dotchi-taiketsu": "S", "sankagata-odai": "S", "quiz-senshuken": "S", "xgrid-4koma": "A", "prompt-ba": "A", "tsukaiwake-chart": "A", "aruaru-kakeai": "B", "dokuzetu-review": "B", "gachi-thread": "C", "trend-sokuhou": "C"};
   data.forEach(t => {
     const bc = t.status==='posted'?'bdg-posted':t.status==='scheduled'?'bdg-scheduled':'bdg-draft';
@@ -532,16 +678,18 @@ mkBar('c-ximg-bar', ["diagram"], [
     const rc = rk==='S'?'bdg-s':rk==='A'?'bdg-a':rk==='B'?'bdg-b':'bdg-c';
     const row = document.createElement('tr');
     row.innerHTML =
-      `<td>${t.date}</td><td>${t.day}</td><td>${t.pattern}</td>` +
+      `<td>${t.date}</td><td>${t.time_slot||''}</td><td>${t.content_type||''}</td><td>${t.pattern}</td>` +
       `<td><span class="bdg ${rc}">${rk}</span></td><td>${t.pillar}</td>` +
-      `<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.topic}">${t.topic}</td>` +
+      `<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.topic}">${t.topic}</td>` +
       `<td><span class="bdg ${bc}">${t.status}</span></td>` +
       `<td>${t.impressions.toLocaleString()}</td><td>${t.engagement_rate}%</td>` +
       `<td>${t.likes}</td><td>${t.replies}</td><td>${t.retweets}</td><td>${t.bookmarks}</td>` +
-      `<td style="font-weight:600">${t.composite_score}</td><td>${t.image_type}</td>`;
+      `<td style="font-weight:600">${t.composite_score}</td><td>${t.image_type}</td>` +
+      `<td>${t.source||''}</td><td>${t.char_count||0}</td><td>${t.note_linked||''}</td>` +
+      `<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.7rem" title="${(t.post_text||'').replace(/"/g,'&quot;')}">${t.post_text||''}</td>`;
     tbody.appendChild(row);
   });
-  if (!data.length) tbody.innerHTML = '<tr><td colspan="15" class="empty" style="padding:16px">投稿データなし</td></tr>';
+  if (!data.length) tbody.innerHTML = '<tr><td colspan="20" class="empty" style="padding:16px">投稿データなし</td></tr>';
 })();
 
 // ===== テーブルソート =====

@@ -1,11 +1,15 @@
 """
-画像生成スクリプト — サムネイル / 図解 / 4コマ漫画 / Xグリッド / クイズをレギュレーションに従って生成する
+画像生成スクリプト — サムネイル / 図解 / Mermaid / 4コマ漫画 / Xグリッド / クイズをレギュレーションに従って生成する
 
 リファレンス画像をfew-shotとしてAPIに渡し、トーン・キャラの一貫性を保つ。
+Mermaid タイプは mmdc (mermaid-cli) でレンダリングする（API不要）。
 
 使い方:
   python scripts/generate_image.py thumbnail "AIエージェントがオフィスで働く風景"
   python scripts/generate_image.py diagram "ワークフローの全体像"
+  python scripts/generate_image.py mermaid "graph LR; A-->B" --topic ai-pipeline
+  python scripts/generate_image.py mermaid --mmd knowledge/pipeline-map.mmd --topic pipeline
+  python scripts/generate_image.py mermaid --mmd-index 2 knowledge/pipeline-map.md --topic x-batch
   python scripts/generate_image.py comic "AIに仕事を任せたら..." --story "1:残業の山|疲れた表情でデスクに向かう 2:AI発見！|AIロボットを見つけて驚く 3:全自動！|AIが作業、本人はお茶 4:...え？|成果物が文字化け"
   python scripts/generate_image.py x-grid "AIに議事録を任せたら" --story "1:会議3時間|疲れた表情で居眠り 2:完璧な議事録|AIが差し出す議事録に驚く 3:上司も絶賛|サムズアップで褒められる 4:…結論|もう一回会議しましょう"
   python scripts/generate_image.py diagram "AIワークフローの比較表" --topic workflow --layout board
@@ -19,7 +23,10 @@ import argparse
 import base64
 import json
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -115,7 +122,7 @@ The attached reference image shows Aiko, the AI idol team's center — match her
 ## Scene: Blackboard Classroom Style
 - A large GREEN CHALKBOARD occupies 60-70% of the image background.
 - The article topic/keyword is written on the chalkboard in CHALK-STYLE pixel text (white/pastel chalk strokes on green board).
-- Chalk text should be SHORT (2-6 characters max, Japanese OK). Large, bold, clearly readable.
+- Chalk text MUST be in Japanese. SHORT (2-6 characters max). Large, bold, clearly readable. No English text.
 - Chalk dust particles and eraser marks add texture.
 - Wooden frame around the chalkboard.
 
@@ -200,7 +207,7 @@ The attached reference image shows Aiko, the AI idol team's center — match her
 - LEFT side: A character's pixel art portrait (full body, 2-3 heads tall chibi).
 - RIGHT side: STATUS BARS and PARAMETER BOXES arranged vertically.
 - Status bars are horizontal meter bars (like HP/MP bars) with different fill levels and colors.
-- Each bar has a SHORT Japanese label (2-4 chars) to its left (e.g., "正確さ", "速度", "創造力").
+- Each bar has a SHORT Japanese label (2-4 chars) to its left (e.g., "正確さ", "速度", "創造力"). ALL text MUST be in Japanese — no English labels.
 - 3-5 status bars total. Different fill percentages to show character strengths/weaknesses.
 - A decorative RPG-style frame/border around the entire status panel.
 
@@ -286,7 +293,7 @@ The attached reference image shows Aiko, the AI idol team's center — match her
 - The image is divided into 2 PANELS side by side (LEFT and RIGHT), separated by a thin black border.
 - LEFT panel: A character says/does something (the "SETUP" or "BOKE" — funny/wrong statement).
 - RIGHT panel: Another character reacts (the "PUNCHLINE" or "TSUKKOMI" — correction/reaction).
-- Each panel has a SHORT Japanese speech label (2-4 chars) in a high-contrast pixel banner at the bottom.
+- Each panel has a SHORT Japanese speech label (2-4 chars) in a high-contrast pixel banner at the bottom. ALL visible text MUST be in Japanese.
 - The composition reads LEFT → RIGHT (setup → punchline).
 - This is a PREVIEW — it should make viewers want to read the full article.
 
@@ -440,6 +447,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a comic strip, not a scene illustration.
 - Character design must NOT change between panels.
 - Keep it simple and readable at small sizes.
+- ALL visible text (labels, banners) MUST be in Japanese. Do NOT use English for any user-facing text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -470,6 +478,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO photorealistic style. NO anti-aliasing.
 - NO office/isometric scenes. This is a story scene, not a landscape.
 - Keep it simple — one focal action, one label.
+- ALL visible text (labels, banners) MUST be in Japanese. Do NOT use English for any user-facing text.
 
 ## Account Concept (for palette reference)
 {{CONCEPT}}
@@ -503,6 +512,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, small, as a presenter.
 - All 4 options must be clearly visible and readable.
+- ALL visible text (question, options, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -536,6 +546,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, small.
 - The ○ and × must be the most prominent visual elements after the question.
+- ALL visible text (header, statement, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -569,6 +580,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, small.
 - The blank must be clearly identifiable as the part to fill in.
+- ALL visible text (header, sentence, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -602,6 +614,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, small.
 - At least one ranking slot must be hidden/mystery to create engagement.
+- ALL visible text (title, labels, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -629,7 +642,8 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO photorealistic style. NO anti-aliasing.
 - NO office/isometric scenes for the background. Keep scenes simple pixel art vignettes.
 - Character appears exactly ONCE at the bottom as presenter.
-- The two halves must be clearly labeled "A" and "B" or "左" and "右".
+- The two halves must be clearly labeled "左" and "右" (Japanese). No English labels.
+- ALL visible text (header, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -659,6 +673,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, medium-small size.
 - The question text must be large, clear, and readable.
+- ALL visible text (header, question, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -688,6 +703,7 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO office/isometric scenes. This is a QUIZ card.
 - Character appears exactly ONCE, small.
 - The actual answer must NOT be visible — only the question and hidden number.
+- ALL visible text (title, labels, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -717,7 +733,8 @@ The attached reference image shows Aiko's character design — reproduce her fai
 - NO photorealistic style. NO anti-aliasing.
 - NO isometric full-room scenes. Keep each side as a simple vignette or icon cluster.
 - Character appears exactly ONCE at the bottom.
-- Both sides must be clearly labeled "Before" and "After" (or Japanese equivalents).
+- Both sides must be clearly labeled "ビフォー" and "アフター" (Japanese). No English "Before"/"After" labels.
+- ALL visible text (title, labels, CTA) MUST be in Japanese. No English text.
 
 ## Account Concept (for palette reference)
 {CONCEPT}
@@ -1102,6 +1119,122 @@ def crop_all(src: Path, presets: list[str] | None = None) -> list[Path]:
     return [crop_image(src, p) for p in targets]
 
 
+# ── Mermaid ──────────────────────────────────────────────────────────
+
+MERMAID_THEME_CONFIG = ROOT / "config" / "mermaid-theme.json"
+
+# サイズプリセット
+MERMAID_SIZES = {
+    "x":    {"width": 1200, "height": 675},   # X投稿向け横長
+    "note": {"width": 1536, "height": 1024},   # note図解向け
+    "wide": {"width": 1920, "height": 1080},   # フルHD横長
+    "square": {"width": 1024, "height": 1024},  # 正方形
+}
+
+
+def _extract_mermaid_from_md(md_path: Path, index: int = 0) -> str:
+    """Markdownファイルから N番目の ```mermaid コードブロックを抽出する。"""
+    text = md_path.read_text(encoding="utf-8")
+    blocks: list[str] = []
+    in_block = False
+    current: list[str] = []
+    for line in text.splitlines():
+        if line.strip().startswith("```mermaid"):
+            in_block = True
+            current = []
+        elif in_block and line.strip() == "```":
+            in_block = False
+            blocks.append("\n".join(current))
+        elif in_block:
+            current.append(line)
+    if not blocks:
+        raise ValueError(f"No mermaid blocks found in {md_path}")
+    if index >= len(blocks):
+        raise ValueError(f"Only {len(blocks)} mermaid blocks in {md_path}, requested index {index}")
+    return blocks[index]
+
+
+def generate_mermaid(
+    code: str,
+    topic: str | None = None,
+    size: str = "x",
+    mmd_file: str | None = None,
+    mmd_index: int = 0,
+) -> Path:
+    """Mermaid コードを mmdc でレンダリングし PNG で保存する。"""
+    mmdc = shutil.which("mmdc")
+    if not mmdc:
+        raise RuntimeError(
+            "mmdc not found. Install: npm install -g @mermaid-js/mermaid-cli"
+        )
+
+    # ソース決定: --mmd ファイル指定 or インラインコード
+    if mmd_file:
+        mmd_path = Path(mmd_file)
+        if not mmd_path.is_absolute():
+            mmd_path = ROOT / mmd_path
+        if mmd_path.suffix == ".md":
+            mermaid_code = _extract_mermaid_from_md(mmd_path, mmd_index)
+        else:
+            mermaid_code = mmd_path.read_text(encoding="utf-8")
+    else:
+        mermaid_code = code
+
+    dims = MERMAID_SIZES.get(size, MERMAID_SIZES["x"])
+
+    # 出力先
+    output_dir = ROOT / "knowledge" / "data" / "images"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    topic_slug = _slugify_topic(topic)
+    output_path = output_dir / f"mermaid_{topic_slug}_{date_str}.png"
+
+    # 一時ファイルに mermaid コードを書き出し
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".mmd", delete=False, encoding="utf-8"
+    ) as tmp:
+        tmp.write(mermaid_code)
+        tmp_path = tmp.name
+
+    try:
+        cmd = [
+            mmdc,
+            "-i", tmp_path,
+            "-o", str(output_path),
+            "-w", str(dims["width"]),
+            "-H", str(dims["height"]),
+            "-b", "#1a2e14",
+            "--scale", "2",
+        ]
+        # テーマ設定ファイルがあれば使用
+        if MERMAID_THEME_CONFIG.exists():
+            cmd.extend(["-c", str(MERMAID_THEME_CONFIG)])
+
+        print(f"[mermaid] size={size} ({dims['width']}x{dims['height']})")
+        print(f"[mermaid] code: {mermaid_code[:100]}...")
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            print(f"[mermaid] stderr: {result.stderr}")
+            raise RuntimeError(f"mmdc failed: {result.stderr}")
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+    print(f"[mermaid] saved: {output_path}")
+
+    # プロンプトログ記録
+    _save_prompt_log(
+        image_type="mermaid",
+        style=size,
+        topic=topic,
+        prompt=mermaid_code[:200],
+        full_prompt=mermaid_code,
+        ref_chars=[],
+        output_path=output_path,
+    )
+
+    return output_path
+
+
 def generate_x_grid(prompt: str, story: str, topic: str | None = None) -> list[Path]:
     """X投稿用4枚グリッド画像を独立生成する（Method C）"""
     # --story をパース: "1:ラベル|説明 2:ラベル|説明 ..."
@@ -1161,6 +1294,18 @@ def main():
                              default="all",
                              help="クロッププリセット（デフォルト: all）")
 
+    # --- mermaid サブコマンド ---
+    mmd_parser = subparsers.add_parser("mermaid", help="Mermaid図をPNGにレンダリング")
+    mmd_parser.add_argument("code", nargs="?", default="",
+                            help="Mermaidコード（インライン）")
+    mmd_parser.add_argument("--mmd", dest="mmd_file", default=None,
+                            help=".mmd or .md ファイルパス")
+    mmd_parser.add_argument("--mmd-index", type=int, default=0,
+                            help=".md 内のN番目のmermaidブロック（0始まり、デフォルト: 0）")
+    mmd_parser.add_argument("--topic", default=None, help="トピック名（ファイル名用）")
+    mmd_parser.add_argument("--size", choices=list(MERMAID_SIZES.keys()),
+                            default="x", help="サイズプリセット（デフォルト: x）")
+
     # --- generate サブコマンド（従来の動作） ---
     all_types = ["thumbnail", "diagram", "comic", "x-grid",
                  "quiz-choice", "quiz-ox", "quiz-fill", "quiz-ranking",
@@ -1181,8 +1326,8 @@ def main():
                             help="生成後に追加クロップ（ヘッダー画像等）")
 
     # --- 後方互換: サブコマンドなしで type を直接指定 ---
-    # sys.argv[1] が "crop" / "generate" でなければ旧CLI形式とみなす
-    if len(sys.argv) > 1 and sys.argv[1] not in ("crop", "generate", "-h", "--help"):
+    # sys.argv[1] が "crop" / "generate" / "mermaid" でなければ旧CLI形式とみなす
+    if len(sys.argv) > 1 and sys.argv[1] not in ("crop", "generate", "mermaid", "-h", "--help"):
         old_parser = argparse.ArgumentParser(description="画像生成（後方互換モード）")
         old_parser.add_argument("type", choices=all_types)
         old_parser.add_argument("prompt")
@@ -1197,6 +1342,20 @@ def main():
         args.command = "generate"
     else:
         args = parser.parse_args()
+
+    if args.command == "mermaid":
+        if not args.code and not args.mmd_file:
+            print("[error] mermaid requires inline code or --mmd file")
+            sys.exit(1)
+        output = generate_mermaid(
+            code=args.code,
+            topic=args.topic,
+            size=args.size,
+            mmd_file=args.mmd_file,
+            mmd_index=args.mmd_index,
+        )
+        print(f"\n完了: {output}")
+        return
 
     if args.command == "crop":
         src = Path(args.source)

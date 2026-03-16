@@ -1,0 +1,28 @@
+type: search
+query: AI 非エンジニア 事務職 営業 活用 初心者 わかりやすく 噛み砕き
+period:
+  from: '2026-02-14'
+  to: '2026-03-16'
+analyzed_at: '2026-03-16T15:41:40.688079'
+summary: "1. 検索結果の概要  \nX（旧Twitter）上で、非エンジニアの事務職・営業職向けにAI（主にClaude Code、NotebookLM、ChatGPTなど）を初心者でもわかりやすく活用する方法が活発に共有されています。営業提案資料の自動作成、Excel自動化、議事録生成などの実務事例が多く、プログラミング知識不要で「日本語指示のみ」で業務効率化が可能という内容が中心。講座告知やプロンプト共有も目立ち、2026年3月頃の最新投稿がヒットしました。[[1]](https://x.com/i/status/2029456174295466139)[[2]](https://x.com/i/status/2030657840789291430)[[3]](https://x.com/i/status/1872034688883474652)\n\
+  \n2. 主要な投稿・意見（URL付きで最大5件）  \n- @masahirochaen: Claude Codeで営業提案資料（Excel11シート、PPTなど）を手修正ゼロで自動生成。非エンジニアでも精度高く事務・営業業務に活用可能。https://x.com/masahirochaen/status/2029456174295466139\
+  \ [[1]](https://x.com/i/status/2029456174295466139)  \n- @masahirochaen: 非エンジニア向けClaude\
+  \ Code活用講座告知。営業提案書、ガントチャート、人事評価Excelなどを日本語指示で自動化。スキル共有あり。https://x.com/masahirochaen/status/2030657840789291430\
+  \ [[2]](https://x.com/i/status/2030657840789291430)  \n- @usutaku_channel: Claude\
+  \ Codeの非開発業務活用事例（Qiita記事紹介）。事務・営業の実務で手触り感ある事例が役立つと評価。https://x.com/usutaku_channel/status/2028723879171207354\
+  \ [[4]](https://x.com/i/status/2028723879171207354)  \n- @ChatgptAIskill: NotebookLMで営業提案スライド作成プロンプト公開。デザイン指示を入れるコツで初心者でもプロ級資料が作れる。https://x.com/ChatgptAIskill/status/2033288381439131882\
+  \ [[5]](https://x.com/i/status/2033288381439131882)  \n- @usutaku_channel: AI初心者向け試すべき事例一覧（議事録化、Excelマクロ、営業ロールプレイングなど）。事務・営業に直結するものが多数。https://x.com/usutaku_channel/status/1872034688883474652\
+  \ [[3]](https://x.com/i/status/1872034688883474652)\n\n3. 全体的な傾向やセンチメント  \n傾向: Claude\
+  \ Codeが非エンジニアの「業務組み込みツール」として人気で、Excel/PPT/Wordの自動生成や市場調査が頻出。初心者向けにプロンプト共有や講座が増加。センチメント:\
+  \ 非常にポジティブ。「プログラミング不要」「業務革命」「即戦力」との声が多く、効率化の喜びが共有。注意点として「人間の最終チェック必須」との現実的な意見も。[[6]](https://x.com/i/status/2032245259766300978)\n\
+  \n4. コンテンツに活かせるポイント  \n- 具体プロンプト活用: 営業スライドや提案資料のデザイン指示をコピーして即適用。[[5]](https://x.com/i/status/2033288381439131882)\
+  \  \n- 事例再現: ヒアリング内容からExcel（見積もり・ガントチャート）自動生成で事務・営業効率化。[[1]](https://x.com/i/status/2029456174295466139)\
+  \  \n- ツール選定: Claude Code（精度向上スキル化）やNotebookLM（タスク提案）が初心者向き。[[2]](https://x.com/i/status/2030657840789291430)\
+  \  \n- ステップ: AI自動化＋人間確認でミス回避。日常業務リストをAIに投げて活用法提案。[[3]](https://x.com/i/status/1872034688883474652)"
+citations:
+- https://x.com/i/status/2029456174295466139
+- https://x.com/i/status/2030657840789291430
+- https://x.com/i/status/1872034688883474652
+- https://x.com/i/status/2028723879171207354
+- https://x.com/i/status/2033288381439131882
+- https://x.com/i/status/2032245259766300978
