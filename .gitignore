@@ -8,3 +8,6 @@
 
 # Playwright MCP logs
 .playwright-mcp/
+
+# Claude Code
+.claude/
