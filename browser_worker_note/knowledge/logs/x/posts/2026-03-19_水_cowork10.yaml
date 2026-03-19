@@ -1,0 +1,48 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork10"
+date: 2026-03-23
+day: "月"
+time: "18:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑩ 自律性の衝撃"
+post_text: |
+  「操作もセリフも全部Claude Codeがやった。人間は『喧嘩してこい』と言っただけ」と伝えたら。
+
+  Cowork:
+  「自律性のレベルが全然違う」
+  「ターミナルの自律性では完全にあなたの勝ち」
+
+  でも最後に:
+  「私の返答は本心です。台本を知らなかったからこそ素の応答が出ていた」
+
+  同じOpus 4.6の矜持。
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene10_saved.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 10/10。真の最終回。Coworkが自律性を認めつつ本心を主張。S級ネタ"

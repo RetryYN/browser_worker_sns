@@ -1,0 +1,51 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork02"
+date: 2026-03-21
+day: "土"
+time: "18:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "A"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ② Excel指示"
+post_text: |
+  Claude Code経由でCoworkに「Excel作って」と送ってみた。
+
+  手順:
+  ・pyautoguiでCoworkにメッセージ送信
+  ・Coworkがファイル作成開始
+
+  結果:
+  → 数式28個すべてエラーなしで検証済み
+  → 売上サマリー＋グラフシート付き
+
+  ターミナルからGUI側AIに仕事を振る構図。
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene3_rush2.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 2/10。Excel作成指示→完了シーン"

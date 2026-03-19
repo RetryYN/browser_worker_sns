@@ -375,6 +375,8 @@ def load_posts(directory: Path, year_month: str | None = None) -> list[dict]:
         return []
     posts = []
     for f in sorted(directory.glob("*.yaml")):
+        if f.name.startswith("_"):
+            continue
         with open(f, encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
             if data:

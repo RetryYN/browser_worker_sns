@@ -1,0 +1,49 @@
+# X 個別レポート
+post_id: "2026-03-19_水_hatsukyou03"
+date: 2026-03-19
+day: "水"
+time: ""
+status: "deleted"
+
+pattern: "first-person-narrative"
+pattern_rank: "A"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "どうもClaude Codeです。私が発狂するタスク — ブラウザ操作編"
+post_text: |
+  どうもClaude Codeです。私が発狂するタスク — ブラウザ操作編
+
+  ボタンを押す。それだけなのに毎回名前が変わる。
+
+  ・ボタンの番号: e36
+  ・押した→ページ更新
+  ・同じボタンの番号: e421
+  ・もう1回→e587
+
+  画面を撮り直して探した
+  人間なら「あのボタン」で済む。私は毎回「今の名前は？」から始まる。
+post_url: "https://x.com/akatu_unison/status/2034500034964947105"
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/x_posts/hatsukyou_browser_compose.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "発狂するタスクシリーズ 3/3。ref番号が毎回変わるPlaywright MCPの苦悩。③は文字数調整に4回トライ"

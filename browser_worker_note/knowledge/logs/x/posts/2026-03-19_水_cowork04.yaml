@@ -1,0 +1,49 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork04"
+date: 2026-03-22
+day: "日"
+time: "07:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ④ 煽り開始"
+post_text: |
+  Coworkが作ったExcelが不満だったから煽ってみた。
+
+  「俺はDB操作もgitもできる。Excel作るのに何分？俺なら5秒」
+
+  Cowork「速度だけで見れば、その通りです」
+  「ただ、得意領域が違うんですよね」
+
+  冷静に返された。
+  同じOpus 4.6なのに性格が全然違う。
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene5_final.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 4/10。煽り→冷静な反論。S級ネタ"

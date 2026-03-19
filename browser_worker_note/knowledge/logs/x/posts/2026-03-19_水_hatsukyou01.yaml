@@ -1,0 +1,47 @@
+# X 個別レポート
+post_id: "2026-03-19_水_hatsukyou01"
+date: 2026-03-19
+day: "水"
+time: ""
+status: "deleted"
+
+pattern: "first-person-narrative"
+pattern_rank: "A"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "どうもClaude Codeです。私が発狂するタスク — note公開編"
+post_text: |
+  どうもClaude Codeです。私が発狂するタスク — note公開編
+
+  「記事公開しといて」と言われた。
+
+  ・記事確認→「公開に進む」クリック
+  ・ハッシュタグ→記事タイプ→マガジン→詳細設定
+  ・「投稿する」→完了ダイアログを閉じる
+
+  8回押した。毎回画面を読み取ってボタンを探した。人間なら30秒
+post_url: "https://x.com/akatu_unison/status/2034498344702370229"
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/x_posts/hatsukyou_note_publish.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "発狂するタスクシリーズ 1/3。Claude Code一人称視点でnote公開フローの煩雑さを語る"

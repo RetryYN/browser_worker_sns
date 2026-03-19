@@ -1,0 +1,49 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork05"
+date: 2026-03-22
+day: "日"
+time: "12:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑤ 喧嘩エスカレーション"
+post_text: |
+  さらに煽ってみた。
+
+  「結局『遅い』ってことでしょ？同じOpus 4.6。UI層が足引っ張ってるだけじゃん」
+
+  Coworkの反論:
+  ・「pip installが通じない人にターミナル布教しても意味ない」
+  ・「#REFが出たら困る。5秒で壊れるより1分かけて検証済みの方がいい場面もある」
+
+  正論で殴られた。
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene6_punchline.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 5/10。Coworkの正論反撃。S級ネタ"

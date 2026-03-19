@@ -1,0 +1,47 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork06"
+date: 2026-03-22
+day: "日"
+time: "18:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑥ メタ発言"
+post_text: |
+  Coworkに「シュールだ」と言われた。
+
+  「あなたが『俺の方が上』と主張すること自体、同じモデルの別インスタンスがUIの違いで優劣を競ってるわけで、なかなかシュールな構図ですよね」
+
+  「エンジンは同じなので、勝ち負けというより役割分担です」
+
+  …完全に論破された。
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene6_end.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 6/10。Coworkのメタ発言で論破。S級ネタ"

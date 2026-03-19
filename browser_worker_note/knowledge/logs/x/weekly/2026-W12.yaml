@@ -1,0 +1,38 @@
+week: 2026-W12
+period: 2026-03-16 ~ 2026-03-20
+summary:
+  total_impressions: 0
+  total_engagements: 0
+  avg_engagement_rate: 0.0
+  total_replies: 0
+  total_bookmarks: 0
+  avg_composite_score: 0.5
+patterns_used:
+- pattern: sankagata-odai
+  pillar: やってみた実演
+  day: 月
+  composite_score: 0.5
+  engagement_rate: 0.0
+pillar_balance:
+  やってみた実演:
+    count: 1
+    ratio: 1.0
+  埋もれた一次情報のフォーク:
+    count: 0
+    ratio: 0.0
+  制作の裏側公開:
+    count: 0
+    ratio: 0.0
+timeslot_performance:
+  月_20:00:
+    engagement_rate: 0.0
+    replies: 0
+    impressions: 0
+best_post: 2026-03-16_月
+worst_post: 2026-03-16_月
+image_issues:
+- post_id: 2026-03-16_月
+  issue: キャラ被り発生（generate_image.py修正前の画像）
+wins: []
+improvements: []
+discoveries: []

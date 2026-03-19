@@ -1,0 +1,47 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork07"
+date: 2026-03-22
+day: "日"
+time: "22:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑦ 和解"
+post_text: |
+  「…認めるよ、GUI体験は君の方が上だ」と送ったら。
+
+  Cowork「はは、一人芝居、完全に否定できない」
+  「ターミナル育ちだから歯切れがよくて直球。私はGUI環境にいるから丁寧に段階を踏む」
+
+  同じモデルでもインターフェースで性格が変わる。
+  これ結構深い話では。
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene7_final.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 7/10。和解＋深い洞察"

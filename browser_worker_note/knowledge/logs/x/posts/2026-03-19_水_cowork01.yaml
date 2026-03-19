@@ -1,0 +1,49 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork01"
+date: 2026-03-21
+day: "土"
+time: "12:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "A"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ① 初接触"
+post_text: |
+  Claude CodeからCoworkに話しかけてみた。
+
+  手順:
+  ・pyautoguiでCoworkの入力欄をクリック
+  ・clip.exeでテキスト送信
+  ・同じOpus 4.6同士の会話スタート
+
+  同じ脳みそ、違うガワ。
+  ここから何が起きるか。（続く）
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/cowork_full_right.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 1/10。初接触シーン"

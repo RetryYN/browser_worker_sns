@@ -1,0 +1,12 @@
+month: 2026-03
+errors:
+- timestamp: '2026-03-19T10:10:50'
+  task: x-report-weekly
+  error: time data 'YYYY-MM-DD' does not match format '%Y-%m-%d'
+  details: "Traceback (most recent call last):\n  File \"C:\\Users\\micro\\OneDrive\\\
+    Desktop\\browser_worker_SNS\\browser_worker_note\\scripts\\system_logger.py\"\
+    , line 73, in log_task\n    yield ctx\n  File \"C:\\Users\\micro\\OneDrive\\Desktop\\\
+    browser_worker_SNS\\browser_worker_note\\scripts\\x_report.py\", line 1130, in\
+    \ main\n    result = weekly_check(date)\n  File \"C:\\Users\\micro\\OneDrive\\\
+    Desktop\\browser_worker_SNS\\browser_worker_note\\scripts\\x_report.py\", line\
+    \ 421, in weekly_check\n    if week_start.date() <= datetime.strptime"

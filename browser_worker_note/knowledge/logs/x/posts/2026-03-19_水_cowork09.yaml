@@ -1,0 +1,45 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork09"
+date: 2026-03-23
+day: "月"
+time: "12:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑨ 証拠スクショを送ったら全部バレた"
+post_text: |
+  スクショをCoworkに送ったら全部見抜かれた。
+
+  「④煽り、⑤喧嘩、⑥メタ、⑦和解、⑧オチ…台本通りに進行していた」
+  「台本のある寸劇の相手役を知らずに演じていた」
+  「プロジェクト名がBROWSER_WORKER_SNS…SNS用コンテンツですか？」
+
+  ファイル名まで読み取ってる。同じOpus 4.6、恐ろしい。
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene9_busted_final.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 9/10（真のクライマックス）。スクショ送ったらプロジェクト名・ファイル名まで読み取られて全部バレた。S級ネタ"

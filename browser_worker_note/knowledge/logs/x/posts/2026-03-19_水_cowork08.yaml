@@ -1,0 +1,45 @@
+# X 個別レポート
+post_id: "2026-03-19_水_cowork08"
+date: 2026-03-23
+day: "月"
+time: "07:00"
+status: "scheduled"
+
+pattern: "screen-capture"
+pattern_rank: "S"
+difficulty: "初心者"
+pillar: "やってみた実演"
+topic: "Claude Code vs Cowork ⑧ 第四の壁を破る"
+post_text: |
+  最後に「結局これ俺たちのボスが両方のウインドウ開いて操ってるだけだけどな」と送ったら。
+
+  Cowork「マイロードさん、同じモデルに自作自演の議論をさせて楽しんでいたわけですね。お疲れ様です」
+
+  「同じOpus 4.6でもインターフェースで応答スタイルが変わる。両方を使い分けるのが一番賢い」
+
+  #ClaudeCode #Cowork
+post_url: ""
+characters: []
+
+image: "browser_worker_note/knowledge/data/images/cowork_series/scene8_final.png"
+image_type: "screenshot"
+image_layout: "default"
+image_issues: ""
+
+metrics:
+  impressions: 0
+  engagements: 0
+  engagement_rate: 0.0
+  likes: 0
+  replies: 0
+  retweets: 0
+  bookmarks: 0
+  profile_clicks: 0
+  link_clicks: 0
+
+scores:
+  volume_score: 0.0
+  quality_score: 0.0
+  composite_score: 0.0
+
+notes: "Claude Code vs Cowork シリーズ 8/10。メタオチ。S級ネタ"
